@@ -46,9 +46,9 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pt-6 animate-fade-in-up">
-      <div className="px-2">
-        <h2 className="text-2xl font-bold font-mono text-white tracking-tight">Withdraw Funds</h2>
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="px-1">
+        <h2 className="text-2xl font-bold font-mono text-white tracking-tight">Withdraw</h2>
       </div>
 
       <Card className="bg-gradient-to-br from-white/10 to-transparent border-white/20 relative overflow-hidden">
@@ -94,7 +94,8 @@ const Wallet: React.FC = () => {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono text-sm placeholder-white/20"
+              /* text-base prevents iOS zoom on focus */
+              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono placeholder-white/20"
               placeholder={method === WithdrawalMethod.CWALLET ? "user@example.com" : "BTC Address..."}
               required
             />
@@ -103,13 +104,15 @@ const Wallet: React.FC = () => {
           <div>
             <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">Amount (USD)</label>
             <div className="relative group">
-              <span className="absolute left-3 top-3 text-white/40 group-focus-within:text-white transition-colors">$</span>
+              <span className="absolute left-3 top-3.5 text-white/40 group-focus-within:text-white transition-colors">$</span>
               <input
                 type="number"
                 step="0.0001"
+                inputMode="decimal"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 pl-7 text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono text-sm"
+                /* text-base prevents iOS zoom on focus */
+                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 pl-7 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono"
                 placeholder="0.0000"
                 required
               />
@@ -121,7 +124,7 @@ const Wallet: React.FC = () => {
         </Card>
 
         <Button type="submit" isLoading={loading} className="mt-4">
-           {loading ? 'PROCESSING TRANSACTION...' : 'CONFIRM WITHDRAWAL'}
+           {loading ? 'PROCESSING...' : 'CONFIRM WITHDRAWAL'}
         </Button>
       </form>
       
@@ -135,7 +138,7 @@ const Wallet: React.FC = () => {
         </div>
       )}
 
-      <div className="flex justify-center items-center gap-2 text-[10px] text-white/30 uppercase tracking-widest font-mono">
+      <div className="flex justify-center items-center gap-2 text-[10px] text-white/30 uppercase tracking-widest font-mono pt-4">
         <IconLock className="w-3 h-3" />
         Secure Encrypted Transaction
       </div>

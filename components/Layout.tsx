@@ -8,9 +8,11 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="relative min-h-screen w-full bg-black text-white overflow-hidden font-sans selection:bg-white selection:text-black">
-      {/* 3D Parallax Background Effects - Refined */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+    // Outer Container: Fixed to viewport height (handles mobile browser bars)
+    <div className="fixed inset-0 w-full h-[100dvh] bg-black text-white overflow-hidden font-sans selection:bg-white selection:text-black">
+      
+      {/* 3D Parallax Background Effects - Fixed Position */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Smoother, slower moving orbs */}
         <div className="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] bg-white/[0.03] rounded-full blur-[100px] animate-float opacity-60"></div>
         <div className="absolute bottom-[-20%] right-[-20%] w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[80px] animate-float" style={{ animationDelay: '2s', animationDuration: '12s' }}></div>
@@ -20,13 +22,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-70"></div>
       </div>
 
-      {/* Main Content */}
-      <main className="relative z-10 pb-28 pt-4 px-4 max-w-md mx-auto min-h-screen flex flex-col perspective-1000">
-        {children}
-      </main>
+      {/* Scrollable Content Area */}
+      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden no-scrollbar z-10">
+        <main className="min-h-full pb-32 pt-safe-top px-4 max-w-md mx-auto flex flex-col perspective-1000">
+          <div className="pt-4 md:pt-8">
+            {children}
+          </div>
+        </main>
+      </div>
 
-      {/* Glass Navigation - Ultra Minimal */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] z-50 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+      {/* Glass Navigation - Fixed at bottom */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] z-50 animate-fade-in-up pb-safe-bottom" style={{ animationDelay: '0.2s' }}>
         {/* Glass Layer */}
         <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_40px_-10px_rgba(0,0,0,1)]"></div>
         
