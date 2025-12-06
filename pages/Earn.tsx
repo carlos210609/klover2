@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { backendService } from '../services/mockBackend';
@@ -9,6 +9,20 @@ const Earn: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [lastReward, setLastReward] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Dynamically load the Ad SDK script
+  useEffect(() => {
+    const existingScript = document.getElementById('libtl-sdk');
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.id = 'libtl-sdk';
+      script.src = '//libtl.com/sdk.js';
+      script.dataset.zone = '10283220';
+      script.dataset.sdk = 'show_10283220';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   const handleWatchAd = async () => {
     setLoading(true);
@@ -21,8 +35,8 @@ const Earn: React.FC = () => {
         console.log("Invoking SDK...");
         await window.show_10283220();
       } else {
-        // Fallback for demo if script is blocked by CSP/Adblocker
-        console.warn("SDK not found. Simulating ad watch for demo purposes.");
+        // Fallback for demo if script is blocked by CSP/Adblocker or not loaded yet
+        console.warn("SDK not found or blocked. Simulating ad watch for demo purposes.");
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate ad duration
       }
 

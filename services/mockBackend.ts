@@ -21,15 +21,8 @@ const saveToStorage = (key: string, value: any) => {
 };
 
 // --- INITIAL STATE ---
-let currentUser: User = loadFromStorage<User>(KEY_USER, {
-  id: 0, // Will be set on login
-  username: "guest",
-  firstName: "Guest",
-  photoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=klover", 
-  balance: 0.00,
-  totalEarnings: 0.00,
-  joinDate: new Date().toISOString()
-});
+// We start with null if no user is saved, forcing a login.
+let currentUser: User | null = loadFromStorage<User | null>(KEY_USER, null);
 
 let transactions: Transaction[] = loadFromStorage<Transaction[]>(KEY_TXS, []);
 let adViewTimestamps: number[] = loadFromStorage<number[]>(KEY_ADS, []);
@@ -39,21 +32,51 @@ const MAX_ADS_PER_HOUR = 20;
 
 export const backendService = {
   
-  // 1. Authenticate (Device/Local Based)
-  login: async (): Promise<User> => {
-    // Check if user exists in memory/storage, if not create a random guest ID
-    if (currentUser.id === 0) {
-      currentUser.id = Math.floor(Math.random() * 1000000);
-      currentUser.username = `User_${currentUser.id}`;
-      saveToStorage(KEY_USER, currentUser);
-    }
-    
-    await new Promise(r => setTimeout(r, 500)); // Simulate network
-    return { ...currentUser };
+  // 1. Check Auth Status
+  isAuthenticated: (): boolean => {
+    return !!currentUser;
   },
 
-  // 2. Ad Reward Logic (Critical)
+  // 2. Login with Email (Passwordless/FaucetPay ID)
+  loginWithEmail: async (email: string): Promise<User> => {
+    await new Promise(r => setTimeout(r, 1500)); // Simulate network/handshake
+    
+    // In a real app, this would check the backend DB.
+    // For this standalone version, if the stored user matches the email, we return it.
+    // If not, or if no user exists, we create a new identity for this email.
+    
+    if (currentUser && currentUser.email === email) {
+      return currentUser;
+    }
+
+    // Create new user or overwrite session
+    const newUser: User = {
+      id: Math.floor(Math.random() * 1000000),
+      username: email.split('@')[0],
+      email: email,
+      firstName: "Miner",
+      photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`, 
+      balance: 0.00,
+      totalEarnings: 0.00,
+      joinDate: new Date().toISOString()
+    };
+
+    currentUser = newUser;
+    saveToStorage(KEY_USER, currentUser);
+    return currentUser;
+  },
+
+  logout: async (): Promise<void> => {
+    currentUser = null;
+    localStorage.removeItem(KEY_USER);
+    // Optional: clear other data if you want a fresh start per login
+    // localStorage.removeItem(KEY_TXS);
+  },
+
+  // 3. Ad Reward Logic
   creditReward: async (): Promise<{ success: boolean; newBalance: number; message: string }> => {
+    if (!currentUser) throw new Error("Unauthorized");
+
     const now = Date.now();
     
     // Anti-Fraud: Rate Limiting
@@ -94,8 +117,10 @@ export const backendService = {
     return { success: true, newBalance: currentUser.balance, message: "Reward Credited" };
   },
 
-  // 3. Withdrawal Logic
+  // 4. Withdrawal Logic
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
+    if (!currentUser) throw new Error("Unauthorized");
+    
     if (amount > currentUser.balance) {
       throw new Error("Insufficient balance");
     }
@@ -131,7 +156,11 @@ export const backendService = {
     return tx;
   },
 
-  // 4. Get Data
-  getUser: async () => currentUser,
+  // 5. Get Data
+  getUser: async (): Promise<User> => {
+    if (!currentUser) throw new Error("Not authenticated");
+    return currentUser;
+  },
+  
   getHistory: async () => transactions
 };

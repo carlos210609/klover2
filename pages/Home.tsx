@@ -11,13 +11,14 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadUser = async () => {
-      // Auto-login (Guest/Device ID)
-      const u = await backendService.login();
-      setUser(u);
-    };
-    loadUser();
-  }, []);
+    // We expect the user to be authenticated by the RequireAuth guard
+    backendService.getUser()
+      .then(setUser)
+      .catch(() => {
+        // Fallback should not happen due to guard
+        navigate('/login'); 
+      });
+  }, [navigate]);
 
   if (!user) return <div className="flex h-full items-center justify-center pt-20"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
 
@@ -31,8 +32,8 @@ const Home: React.FC = () => {
             <img src={user.photoUrl} alt="User" className="w-full h-full object-cover relative z-10" />
           </div>
           <div>
-            <h1 className="text-sm text-white/60 font-mono">Welcome back</h1>
-            <p className="font-bold text-white tracking-wide">@{user.username}</p>
+            <h1 className="text-xs text-white/60 font-mono">Connected as</h1>
+            <p className="font-bold text-white tracking-wide text-sm">{user.email}</p>
           </div>
         </div>
         <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-mono text-green-400 shadow-[0_0_10px_rgba(74,222,128,0.1)]">

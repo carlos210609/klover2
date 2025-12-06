@@ -1,6 +1,7 @@
 export interface User {
   id: string | number;
   username: string;
+  email: string; // Added email field
   firstName?: string;
   photoUrl?: string;
   balance: number;
@@ -39,9 +40,30 @@ export interface AdConfig {
   sdkName: string;
 }
 
-// Extend Window to include the ad function
+export interface TelegramWebApp {
+  ready: () => void;
+  expand: () => void;
+  close: () => void;
+  setHeaderColor: (color: string) => void;
+  setBackgroundColor: (color: string) => void;
+  BackButton: {
+    isVisible: boolean;
+    onClick: (callback: () => void) => void;
+    offClick: (callback: () => void) => void;
+    show: () => void;
+    hide: () => void;
+  };
+  initData: string;
+  initDataUnsafe: any;
+  colorScheme: 'light' | 'dark';
+}
+
+// Extend Window to include the ad function and Telegram
 declare global {
   interface Window {
+    Telegram: {
+      WebApp: TelegramWebApp;
+    };
     show_10283220: () => Promise<void>;
   }
 }
