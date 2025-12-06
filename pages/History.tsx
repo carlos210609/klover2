@@ -11,62 +11,53 @@ const History: React.FC = () => {
 
   return (
     <div className="space-y-6 pt-6 animate-fade-in-up">
-      <h2 className="text-2xl font-bold font-mono px-2 tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">History</h2>
+      <h2 className="text-2xl font-bold font-mono px-2 tracking-tight">History</h2>
       
-      <div className="space-y-5 pb-24 perspective-2000">
+      <div className="space-y-4 pb-20">
         {transactions.length === 0 ? (
-          <div className="text-center text-white/30 py-12 font-mono text-xs uppercase tracking-widest border border-dashed border-white/10 rounded-xl bg-white/5 backdrop-blur-sm">
-            No transactions found
+          <div className="text-center text-white/30 py-10 font-mono text-sm border border-dashed border-white/10 rounded-xl">
+            No transactions yet.
           </div>
         ) : (
           transactions.map((tx, index) => (
             <div 
               key={tx.id} 
-              className="relative group preserve-3d cursor-default"
-              style={{ animationDelay: `${index * 75}ms` }}
+              className="relative group perspective-1000"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="relative transform transition-all duration-500 ease-out preserve-3d group-hover:[transform:rotateX(10deg)_translateZ(20px)_scale(1.02)] origin-center">
+              <div className="relative transform transition-all duration-500 ease-out preserve-3d group-hover:[transform:rotateX(5deg)_scale(1.02)] origin-center">
+                {/* Glow Background */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 
-                {/* Back Glow */}
-                <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 translate-z-[-20px]"></div>
-
-                {/* Main Card Content */}
-                <div className="relative bg-black/60 border border-white/5 rounded-2xl p-5 flex justify-between items-center backdrop-blur-xl shadow-lg group-hover:border-white/20 group-hover:bg-black/80 transition-colors duration-300">
-                  
-                  {/* Left Side: Icon & Info */}
-                  <div className="flex items-center gap-4 transform translate-z-[10px]">
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center border backdrop-blur-xl shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300 ${
+                {/* Card Content */}
+                <div className="relative bg-black/40 border border-white/10 rounded-xl p-4 flex justify-between items-center backdrop-blur-md shadow-lg group-hover:bg-black/60 group-hover:border-white/20">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-xl ${
                       tx.type === TransactionType.EARN 
-                        ? 'border-white/10 bg-white/5 text-white group-hover:border-green-400/30 group-hover:text-green-400' 
-                        : 'border-white/10 bg-white/5 text-white group-hover:border-blue-400/30 group-hover:text-blue-400'
+                        ? 'border-green-500/20 bg-green-500/5 text-green-400' 
+                        : 'border-blue-500/20 bg-blue-500/5 text-blue-400'
                     }`}>
-                      <span className="text-lg">
-                        {tx.type === TransactionType.EARN ? '⚡' : '⬋'}
+                      <span className="text-sm">
+                        {tx.type === TransactionType.EARN ? '⚡' : '↘'}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-bold font-mono text-white tracking-wide group-hover:text-white transition-colors">
-                        {tx.type === TransactionType.EARN ? 'Ad Reward' : `${tx.method}`}
+                      <p className="text-xs font-bold font-mono text-white tracking-wide">
+                        {tx.type === TransactionType.EARN ? 'Ad Reward' : `Withdraw to ${tx.method}`}
                       </p>
-                      <p className="text-[10px] text-white/30 mt-1 font-mono uppercase tracking-wider group-hover:text-white/50 transition-colors">
-                        {new Date(tx.timestamp).toLocaleDateString()} • {new Date(tx.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      <p className="text-[10px] text-white/40 mt-0.5">
+                        {new Date(tx.timestamp).toLocaleString()}
                       </p>
                     </div>
                   </div>
-
-                  {/* Right Side: Amount & Status */}
-                  <div className="text-right transform translate-z-[15px]">
-                    <p className={`font-mono text-base font-bold transition-all duration-300 ${
-                      tx.type === TransactionType.EARN 
-                        ? 'text-white group-hover:text-green-400 group-hover:drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]' 
-                        : 'text-white/80 group-hover:text-white'
+                  <div className="text-right">
+                    <p className={`font-mono text-sm font-bold ${
+                      tx.type === TransactionType.EARN ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]' : 'text-white'
                     }`}>
                       {tx.type === TransactionType.EARN ? '+' : '-'}${tx.amount.toFixed(4)}
                     </p>
-                    <div className={`text-[9px] font-bold uppercase tracking-widest mt-1.5 px-2 py-0.5 rounded border ${
-                      tx.status === 'COMPLETED' 
-                        ? 'border-green-500/20 bg-green-500/5 text-green-500/80' 
-                        : 'border-yellow-500/20 bg-yellow-500/5 text-yellow-500/80'
+                    <div className={`text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full inline-block ${
+                      tx.status === 'COMPLETED' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
                     }`}>
                       {tx.status}
                     </div>

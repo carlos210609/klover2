@@ -43,5 +43,8 @@ export interface AdConfig {
 declare global {
   interface Window {
     show_10283220: () => Promise<void>;
+    Telegram?: {
+      WebApp: any;
+    };
   }
 }

@@ -1,79 +1,36 @@
 import { User, Transaction, TransactionType, TransactionStatus, WithdrawalMethod } from '../types';
 import { REWARD_PER_AD } from '../constants';
 
-// --- PERSISTENCE HELPERS ---
-const STORAGE_KEYS = {
-  USER: 'klover_user_v2',
-  TXS: 'klover_txs_v2',
-  ADS: 'klover_ads_v2'
-};
-
-const loadState = <T>(key: string, fallback: T): T => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : fallback;
-  } catch (e) {
-    console.warn(`Failed to load ${key}`, e);
-    return fallback;
-  }
-};
-
-const saveState = (key: string, value: any) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.warn(`Failed to save ${key}`, e);
-  }
-};
-
 // --- MOCK DATABASE ---
-const generateRandomUser = (): User => {
-  const randomId = Math.floor(Math.random() * 900000) + 100000;
-  return {
-    id: randomId,
-    username: `user_${randomId}`,
-    firstName: "Anonymous",
-    photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomId}&backgroundColor=000000`, // Generates a cool avatar
-    balance: 0.00,
-    totalEarnings: 0.00,
-    joinDate: new Date().toISOString()
-  };
+let currentUser: User = {
+  id: 123456,
+  username: "klover_user",
+  firstName: "Crypto Nomad",
+  photoUrl: "https://picsum.photos/200/200", // Placeholder
+  balance: 0.00,
+  totalEarnings: 0.00,
+  joinDate: new Date().toISOString()
 };
 
-let currentUser: User | null = null;
-let transactions: Transaction[] = loadState(STORAGE_KEYS.TXS, []);
-let adViewTimestamps: number[] = loadState(STORAGE_KEYS.ADS, []);
+let transactions: Transaction[] = [];
 
-// --- ANTI-FRAUD CONFIG ---
+// --- ANTI-FRAUD STATE ---
+const adViewTimestamps: number[] = [];
 const MIN_TIME_BETWEEN_ADS = 15000; // 15 seconds
 const MAX_ADS_PER_HOUR = 20;
 
 export const backendService = {
   
-  // 1. Authenticate (Device/Local Based)
-  login: async (): Promise<User> => {
-    // Try to load user from local storage
-    const storedUser = loadState<User | null>(STORAGE_KEYS.USER, null);
-    
-    if (storedUser) {
-      currentUser = storedUser;
-      console.log("Session restored for:", currentUser.username);
-    } else {
-      // Create new user if none exists
-      currentUser = generateRandomUser();
-      saveState(STORAGE_KEYS.USER, currentUser);
-      console.log("New user generated:", currentUser.username);
-    }
-
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 500)); 
+  // 1. Authenticate (Simulated)
+  login: async (telegramInitData: string): Promise<User> => {
+    // In real app: Verify signature of initData with Bot Token
+    console.log("Validating Telegram Data:", telegramInitData);
+    await new Promise(r => setTimeout(r, 800)); // Network delay
     return { ...currentUser };
   },
 
   // 2. Ad Reward Logic (Critical)
   creditReward: async (): Promise<{ success: boolean; newBalance: number; message: string }> => {
-    if (!currentUser) throw new Error("Not authenticated");
-
     const now = Date.now();
     
     // Anti-Fraud: Rate Limiting
@@ -105,19 +62,12 @@ export const backendService = {
     };
     transactions.unshift(tx);
 
-    // Persist changes
-    saveState(STORAGE_KEYS.USER, currentUser);
-    saveState(STORAGE_KEYS.TXS, transactions);
-    saveState(STORAGE_KEYS.ADS, adViewTimestamps);
-
     await new Promise(r => setTimeout(r, 500)); // Database latency
     return { success: true, newBalance: currentUser.balance, message: "Reward Credited" };
   },
 
   // 3. Withdrawal Logic
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
-    if (!currentUser) throw new Error("Not authenticated");
-    
     if (amount > currentUser.balance) {
       throw new Error("Insufficient balance");
     }
@@ -137,30 +87,17 @@ export const backendService = {
     
     transactions.unshift(tx);
     
-    // Persist changes
-    saveState(STORAGE_KEYS.USER, currentUser);
-    saveState(STORAGE_KEYS.TXS, transactions);
-
     // Simulate Processing time
     setTimeout(() => {
         // Find and update transaction status to completed for demo
         const t = transactions.find(tr => tr.id === tx.id);
-        if(t) {
-            t.status = TransactionStatus.COMPLETED;
-            saveState(STORAGE_KEYS.TXS, transactions); // Save updated status
-        }
+        if(t) t.status = TransactionStatus.COMPLETED;
     }, 5000);
 
     return tx;
   },
 
   // 4. Get Data
-  getUser: async () => {
-    if (!currentUser) {
-        // If getting user before login, try to login implicitly
-        return await backendService.login();
-    }
-    return currentUser;
-  },
+  getUser: async () => currentUser,
   getHistory: async () => transactions
 };

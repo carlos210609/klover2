@@ -3,7 +3,7 @@ export const APP_VERSION = "1.0.0";
 
 // Ad Configuration
 export const AD_ZONE_ID = "10283220";
-export const REWARD_PER_AD = 0.001; // Updated to 0.001 as requested
+export const REWARD_PER_AD = 0.005; // USD value example
 
 // API Endpoints (Mocked for Frontend, would point to real backend in production)
 export const API_URL = "https://api.klover.app/v1"; 

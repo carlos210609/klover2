@@ -2,12 +2,13 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>KLOVER | Premium Earning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    
+    <!-- Telegram WebApp -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Ad SDK (LibTL) -->
     <script src="//libtl.com/sdk.js" data-zone="10283220" data-sdk="show_10283220"></script>
     
@@ -23,33 +24,28 @@
             colors: {
               black: '#000000',
               white: '#FFFFFF',
-              glass: 'rgba(255, 255, 255, 0.03)',
-              'glass-hover': 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(255, 255, 255, 0.05)',
+              'glass-hover': 'rgba(255, 255, 255, 0.1)',
             },
             animation: {
-              'float': 'float 8s ease-in-out infinite',
-              'spin-slow': 'spin 12s linear infinite',
-              'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'shimmer': 'shimmer 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'cyber-pulse': 'cyberPulse 3s infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'spin-slow': 'spin 8s linear infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'shimmer': 'shimmer 2s linear infinite',
             },
             keyframes: {
               float: {
-                '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-                '50%': { transform: 'translateY(-15px) rotate(1deg)' },
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
               },
               fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)', filter: 'blur(5px)' },
-                '100%': { opacity: '1', transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+                '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
+                '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
               },
               shimmer: {
-                '0%': { transform: 'translateX(-150%) skewX(-15deg)' },
-                '100%': { transform: 'translateX(150%) skewX(-15deg)' },
-              },
-              cyberPulse: {
-                '0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(255,255,255,0.1)' },
-                '50%': { opacity: '0.8', boxShadow: '0 0 20px rgba(255,255,255,0.3)' }
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
               }
             }
           },
@@ -60,30 +56,21 @@
       body {
         background-color: #000000;
         color: #ffffff;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+        overflow-x: hidden;
       }
-
-      /* Hide Scrollbar but keep functionality */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
       }
-      .no-scrollbar {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+      ::-webkit-scrollbar-track {
+        background: #000;
       }
-
-      /* Remove tap highlight on mobile */
-      * {
-        -webkit-tap-highlight-color: transparent;
+      ::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 2px;
       }
-
       .perspective-1000 {
         perspective: 1000px;
-      }
-      .perspective-2000 {
-        perspective: 2000px;
       }
       .preserve-3d {
         transform-style: preserve-3d;

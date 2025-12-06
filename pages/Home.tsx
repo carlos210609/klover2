@@ -12,26 +12,27 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      // Login via device/local storage logic
-      const u = await backendService.login();
+      // Simulate InitData from Telegram
+      const mockInitData = "query_id=..."; 
+      const u = await backendService.login(mockInitData);
       setUser(u);
     };
     loadUser();
   }, []);
 
-  if (!user) return <div className="flex h-[50vh] items-center justify-center"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
+  if (!user) return <div className="flex h-screen items-center justify-center"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div className="space-y-6 pt-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex justify-between items-center px-1">
+      <div className="flex justify-between items-center px-2">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-white/5 relative group">
              <div className="absolute inset-0 bg-white/10 animate-pulse-slow"></div>
             <img src={user.photoUrl} alt="User" className="w-full h-full object-cover relative z-10" />
           </div>
           <div>
-            <h1 className="text-sm text-white/60 font-mono">ID: {user.id}</h1>
+            <h1 className="text-sm text-white/60 font-mono">Welcome back</h1>
             <p className="font-bold text-white tracking-wide">@{user.username}</p>
           </div>
         </div>
@@ -70,8 +71,8 @@ const Home: React.FC = () => {
       </div>
 
       {/* Recent Activity Mini */}
-      <div className="pt-4 pb-2">
-        <h3 className="text-white/40 font-mono text-xs uppercase mb-3 px-1 tracking-widest">System</h3>
+      <div className="pt-4">
+        <h3 className="text-white/40 font-mono text-xs uppercase mb-3 px-2 tracking-widest">System</h3>
         <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
            <span className="text-xs text-white/60">Server Status</span>
            <span className="text-xs font-mono text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">ONLINE ●</span>
