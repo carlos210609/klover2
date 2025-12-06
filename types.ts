@@ -1,7 +1,7 @@
 export interface User {
-  id: number;
+  id: string | number;
   username: string;
-  firstName: string;
+  firstName?: string;
   photoUrl?: string;
   balance: number;
   totalEarnings: number;
@@ -43,8 +43,5 @@ export interface AdConfig {
 declare global {
   interface Window {
     show_10283220: () => Promise<void>;
-    Telegram?: {
-      WebApp: any;
-    };
   }
 }

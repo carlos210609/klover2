@@ -46,7 +46,7 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pt-6 animate-fade-in-up">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="px-2">
         <h2 className="text-2xl font-bold font-mono text-white tracking-tight">Withdraw Funds</h2>
       </div>
@@ -94,7 +94,7 @@ const Wallet: React.FC = () => {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono text-sm placeholder-white/20"
+              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono placeholder-white/20"
               placeholder={method === WithdrawalMethod.CWALLET ? "user@example.com" : "BTC Address..."}
               required
             />
@@ -109,7 +109,7 @@ const Wallet: React.FC = () => {
                 step="0.0001"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 pl-7 text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono text-sm"
+                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 pl-7 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono"
                 placeholder="0.0000"
                 required
               />

@@ -8,9 +8,9 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="relative min-h-screen w-full bg-black text-white overflow-hidden font-sans selection:bg-white selection:text-black">
+    <div className="relative h-[100dvh] w-full bg-black text-white overflow-hidden font-sans selection:bg-white selection:text-black flex flex-col">
       {/* 3D Parallax Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] animate-float"></div>
         
@@ -18,22 +18,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]"></div>
       </div>
 
-      {/* Main Content */}
-      <main className="relative z-10 pb-24 pt-4 px-4 max-w-md mx-auto min-h-screen flex flex-col">
+      {/* Main Content Area - Scrollable */}
+      <main className="relative z-10 flex-1 overflow-y-auto no-scrollbar pb-32 pt-6 px-4 max-w-md mx-auto w-full">
         {children}
       </main>
 
-      {/* Glass Navigation */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
-        <div className="relative flex justify-around items-center p-4">
-          <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label="Home" />
-          <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-          <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label="Wallet" />
-          <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="History" />
-          <NavItem to="/profile" icon={<IconUser className="w-6 h-6" />} label="Profile" />
-        </div>
-      </nav>
+      {/* Glass Navigation - Fixed at bottom */}
+      <div className="absolute bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <nav className="relative w-[90%] max-w-sm pointer-events-auto">
+          {/* Glass Effect */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
+          
+          {/* Nav Items */}
+          <div className="relative flex justify-between items-center p-4 px-6">
+            <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label="Home" />
+            <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+            <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label="Wallet" />
+            <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="History" />
+            <NavItem to="/profile" icon={<IconUser className="w-6 h-6" />} label="Profile" />
+          </div>
+        </nav>
+      </div>
     </div>
   );
 };

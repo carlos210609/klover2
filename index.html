@@ -7,8 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    <!-- Telegram WebApp -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Ad SDK (LibTL) -->
     <script src="//libtl.com/sdk.js" data-zone="10283220" data-sdk="show_10283220"></script>
     
@@ -56,9 +54,17 @@
       body {
         background-color: #000000;
         color: #ffffff;
-        overflow-x: hidden;
+        overflow: hidden; /* Prevent body scroll for fixed mobile layout */
+        -webkit-tap-highlight-color: transparent;
       }
-      /* Custom Scrollbar */
+      /* Custom Scrollbar hidden for mobile feel */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
       ::-webkit-scrollbar {
         width: 4px;
       }

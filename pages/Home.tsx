@@ -12,18 +12,17 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      // Simulate InitData from Telegram
-      const mockInitData = "query_id=..."; 
-      const u = await backendService.login(mockInitData);
+      // Auto-login (Guest/Device ID)
+      const u = await backendService.login();
       setUser(u);
     };
     loadUser();
   }, []);
 
-  if (!user) return <div className="flex h-screen items-center justify-center"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
+  if (!user) return <div className="flex h-full items-center justify-center pt-20"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
 
   return (
-    <div className="space-y-6 pt-6 animate-fade-in-up">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex justify-between items-center px-2">
         <div className="flex items-center gap-3">
