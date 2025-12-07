@@ -11,14 +11,20 @@ const Layout = ({ children }: LayoutProps) => {
   const showNav = location.pathname !== '/login';
 
   return (
-    <div className="relative h-[100dvh] w-full bg-black text-white overflow-hidden font-sans selection:bg-white selection:text-black flex flex-col">
-      {/* 3D Parallax Background Effects */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] animate-float"></div>
+    <div className="relative h-[100dvh] w-full bg-transparent text-white overflow-hidden font-sans selection:bg-cyan-500 selection:text-white flex flex-col">
+      {/* 3D Parallax Background Effects - COLORED NOW */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Top Purple Glow */}
+        <div className="absolute top-[-15%] left-[-15%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[120px] animate-pulse-slow mix-blend-screen"></div>
         
-        {/* Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+        {/* Bottom Blue/Cyan Glow */}
+        <div className="absolute bottom-[-10%] right-[-20%] w-[500px] h-[500px] bg-blue-900/30 rounded-full blur-[100px] animate-float mix-blend-screen"></div>
+        
+        {/* Center Accent */}
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-indigo-900/20 rounded-full blur-[80px]"></div>
+
+        {/* Grid Overlay - Slightly lighter to show depth */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_60%,transparent_100%)]"></div>
       </div>
 
       {/* Main Content Area - Scrollable */}
@@ -30,13 +36,13 @@ const Layout = ({ children }: LayoutProps) => {
       {showNav && (
         <div className="absolute bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
           <nav className="relative w-[90%] max-w-sm pointer-events-auto">
-            {/* Glass Effect */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
+            {/* Glass Effect - Darker Slate Tint */}
+            <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
             
             {/* Nav Items */}
             <div className="relative flex justify-between items-center p-4 px-6">
               <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label="Home" />
-              <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+              <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
               <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label="Wallet" />
               <NavItem to="/shop" icon={<IconShop className="w-6 h-6" />} label="Shop" />
               <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="Hist" />
@@ -54,8 +60,8 @@ const NavItem = ({ to, icon, label, activeClass }: { to: string; icon: React.Rea
     className={({ isActive }) =>
       `flex flex-col items-center gap-1 transition-all duration-300 group ${
         isActive 
-          ? activeClass || 'text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]' 
-          : 'text-white/40 hover:text-white/80'
+          ? activeClass || 'text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]' 
+          : 'text-slate-400 hover:text-white'
       }`
     }
   >

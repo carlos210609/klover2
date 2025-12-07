@@ -25,6 +25,9 @@
               white: '#FFFFFF',
               glass: 'rgba(255, 255, 255, 0.05)',
               'glass-hover': 'rgba(255, 255, 255, 0.1)',
+              'deep-bg': '#020617', // Slate 950
+              'neon-blue': '#3b82f6',
+              'neon-purple': '#a855f7',
             },
             animation: {
               'float': 'float 6s ease-in-out infinite',
@@ -53,7 +56,9 @@
     </script>
     <style>
       body {
-        background-color: #000000;
+        /* Deep rich gradient instead of flat black */
+        background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 100%);
+        background-attachment: fixed;
         color: #ffffff;
         overflow: hidden; /* Prevent body scroll for fixed mobile layout */
         -webkit-tap-highlight-color: transparent;
@@ -70,10 +75,10 @@
         width: 4px;
       }
       ::-webkit-scrollbar-track {
-        background: #000;
+        background: #020617;
       }
       ::-webkit-scrollbar-thumb {
-        background: #333;
+        background: #334155;
         border-radius: 2px;
       }
       .perspective-1000 {

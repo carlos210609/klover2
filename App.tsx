@@ -40,9 +40,9 @@ const Profile = () => {
 
   return (
     <div className="pt-10 px-4 text-center animate-fade-in-up">
-      <h2 className="text-xl font-mono mb-4">Profile Settings</h2>
-      <div className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm">
-        <div className="w-16 h-16 rounded-full mx-auto mb-4 border border-white/20 overflow-hidden">
+      <h2 className="text-xl font-mono mb-4 text-white">Profile Settings</h2>
+      <div className="p-4 border border-white/10 rounded-xl bg-slate-900/50 backdrop-blur-sm">
+        <div className="w-16 h-16 rounded-full mx-auto mb-4 border border-white/20 overflow-hidden ring-2 ring-purple-500/20">
           <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
         </div>
         <p className="text-sm font-bold text-white mb-1">
@@ -51,15 +51,15 @@ const Profile = () => {
         <p className="text-xs text-white/50 mb-4">UID: {user.id}</p>
         
         {user.username && (
-           <p className="text-xs text-blue-400 mb-4 font-mono">@{user.username}</p>
+           <p className="text-xs text-cyan-400 mb-4 font-mono">@{user.username}</p>
         )}
 
         <div className="grid grid-cols-2 gap-2 mb-6">
-           <div className="bg-black/40 p-2 rounded border border-white/5">
+           <div className="bg-black/30 p-2 rounded border border-white/5">
              <p className="text-[10px] text-white/40">Spins</p>
-             <p className="font-mono text-blue-400">{user.spins}</p>
+             <p className="font-mono text-cyan-400">{user.spins}</p>
            </div>
-           <div className="bg-black/40 p-2 rounded border border-white/5">
+           <div className="bg-black/30 p-2 rounded border border-white/5">
              <p className="text-[10px] text-white/40">Points</p>
              <p className="font-mono text-purple-400">{user.points}</p>
            </div>
@@ -95,8 +95,9 @@ const AppContent = () => {
             tg.ready();
             tg.expand();
             try {
-                tg.setHeaderColor('#000000');
-                tg.setBackgroundColor('#000000');
+                // MATCHING THE NEW GRADIENT BACKGROUND (Dark Indigo/Slate)
+                tg.setHeaderColor('#1e1b4b'); // Match top of gradient
+                tg.setBackgroundColor('#020617'); // Match bottom of gradient
             } catch (e) {}
         }
 
@@ -126,9 +127,9 @@ const AppContent = () => {
 
   if (isInitializing) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-black">
+      <div className="h-screen w-full flex items-center justify-center bg-transparent">
         <div className="text-center">
-            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-[10px] font-mono text-white/50 animate-pulse">ESTABLISHING SECURE CONNECTION...</p>
         </div>
       </div>
