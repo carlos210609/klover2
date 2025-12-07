@@ -5,6 +5,7 @@ import { ROULETTE_PRIZES } from '../constants';
 const KEY_USER = 'klover_user';
 const KEY_TXS = 'klover_transactions';
 const KEY_ADS = 'klover_ad_timestamps';
+const API_BASE = 'http://localhost:3000/api'; // Point to your local Node server
 
 // --- MOCK DATABASE HELPER ---
 const loadFromStorage = <T>(key: string, defaultVal: T): T => {
@@ -32,31 +33,44 @@ export const backendService = {
   },
 
   loginWithEmail: async (email: string): Promise<User> => {
-    await new Promise(r => setTimeout(r, 800)); 
-    
-    if (currentUser && currentUser.email === email) {
-      return currentUser;
+    // Call Real Backend to Sync/Create User
+    try {
+        const res = await fetch(`${API_BASE}/auth/email`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.user) {
+            currentUser = data.user;
+            saveToStorage(KEY_USER, currentUser);
+            return currentUser!;
+        }
+        throw new Error("Auth failed");
+    } catch (e) {
+        console.warn("Backend unavailable, using offline fallback", e);
+        // Fallback Logic (Mock)
+        if (currentUser && currentUser.email === email) return currentUser;
+        const newUser: User = {
+          id: Math.floor(Math.random() * 1000000),
+          username: email.split('@')[0],
+          email: email,
+          firstName: "Miner",
+          photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`, 
+          balance: 0.00,
+          spins: 1, 
+          points: 0,
+          totalEarnings: 0.00,
+          joinDate: new Date().toISOString()
+        };
+        currentUser = newUser;
+        saveToStorage(KEY_USER, currentUser);
+        return currentUser;
     }
-
-    const newUser: User = {
-      id: Math.floor(Math.random() * 1000000),
-      username: email.split('@')[0],
-      email: email,
-      firstName: "Miner",
-      photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`, 
-      balance: 0.00,
-      spins: 1, // Start with 1 free spin
-      points: 0,
-      totalEarnings: 0.00,
-      joinDate: new Date().toISOString()
-    };
-
-    currentUser = newUser;
-    saveToStorage(KEY_USER, currentUser);
-    return currentUser;
   },
 
   loginWithTelegram: async (initDataUnsafe: any): Promise<User> => {
+     // Simplified for this context, normally would POST initData to backend
     const tgUser = initDataUnsafe.user;
     if (!tgUser) throw new Error("No Telegram user data");
 
@@ -111,6 +125,13 @@ export const backendService = {
     
     saveToStorage(KEY_ADS, adViewTimestamps);
     saveToStorage(KEY_USER, currentUser);
+    
+    // Sync with backend async
+    fetch(`${API_BASE}/action/update`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId: currentUser.id, spins: currentUser.spins })
+    }).catch(e => console.log('Sync failed', e));
 
     await new Promise(r => setTimeout(r, 500));
     return { success: true, message: "+1 Spin Added" };
@@ -160,6 +181,18 @@ export const backendService = {
     saveToStorage(KEY_USER, currentUser);
     saveToStorage(KEY_TXS, transactions);
 
+    // Sync Backend
+    fetch(`${API_BASE}/action/update`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ 
+            userId: currentUser.id, 
+            spins: currentUser.spins, 
+            balance: currentUser.balance, 
+            points: currentUser.points 
+        })
+    }).catch(e => console.log('Sync failed', e));
+
     return { prize: selectedPrize, user: currentUser };
   },
 
@@ -170,8 +203,6 @@ export const backendService = {
     if (item.currency === 'PTS') {
       if (currentUser.points < item.price) throw new Error("Insufficient Points");
       currentUser.points -= item.price;
-    } else {
-      // Future logic for USD items
     }
 
     // Effect Logic
@@ -217,35 +248,45 @@ export const backendService = {
 
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
     if (!currentUser) throw new Error("Unauthorized");
-    if (amount > currentUser.balance) throw new Error("Insufficient balance");
 
-    currentUser.balance -= amount;
+    // TRY REAL BACKEND WITHDRAWAL
+    try {
+        const response = await fetch(`${API_BASE}/withdraw`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                amount: amount,
+                address: address,
+                method: method
+            })
+        });
 
-    const tx: Transaction = {
-      id: `wd_${Date.now()}`,
-      type: TransactionType.WITHDRAWAL,
-      amount: amount,
-      currency: 'USD',
-      method: method,
-      status: TransactionStatus.PENDING,
-      timestamp: Date.now(),
-      details: `To: ${address}`
-    };
-    
-    transactions.unshift(tx);
-    
-    saveToStorage(KEY_USER, currentUser);
-    saveToStorage(KEY_TXS, transactions);
-    
-    setTimeout(() => {
-        const t = transactions.find(tr => tr.id === tx.id);
-        if(t) {
-            t.status = TransactionStatus.COMPLETED;
-            saveToStorage(KEY_TXS, transactions);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || "Withdrawal failed");
         }
-    }, 5000);
 
-    return tx;
+        // Update Local State based on backend success
+        if (data.newBalance !== undefined) {
+            currentUser.balance = data.newBalance;
+            saveToStorage(KEY_USER, currentUser);
+        }
+        
+        // Add to local transactions list for UI display
+        if (data.transaction) {
+            transactions.unshift(data.transaction);
+            saveToStorage(KEY_TXS, transactions);
+            return data.transaction;
+        }
+
+        throw new Error("Invalid backend response");
+
+    } catch (e: any) {
+        console.error("Backend Withdrawal Failed:", e);
+        throw e; // Propagate error to UI
+    }
   },
 
   getUser: async (): Promise<User> => {

@@ -11,7 +11,14 @@
   "dependencies": {
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "react-router-dom": "^7.10.1"
+    "react-router-dom": "^7.10.1",
+    "path": "^0.12.7",
+    "express": "^5.2.1",
+    "fs": "^0.0.1-security",
+    "url": "^0.11.4",
+    "crypto": "^1.0.1",
+    "cors": "^2.8.5",
+    "body-parser": "^2.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
