@@ -13,8 +13,8 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="relative h-[100dvh] w-full bg-slate-950 text-white font-sans selection:bg-cyan-500 selection:text-white flex flex-col overflow-hidden">
       
-      {/* FIXED Background Layer - Stays behind everything */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* FIXED Background Layer - Stays behind everything with negative z-index */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         {/* Deep Space Background Base */}
         <div className="absolute inset-0 bg-slate-950"></div>
 
