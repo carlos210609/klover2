@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { IconHome, IconZap, IconWallet, IconHistory, IconUser } from './Icons';
+import { IconHome, IconZap, IconWallet, IconHistory, IconShop } from './Icons';
 
 interface LayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const showNav = location.pathname !== '/login';
 
@@ -38,8 +38,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label="Home" />
               <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
               <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label="Wallet" />
-              <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="History" />
-              <NavItem to="/profile" icon={<IconUser className="w-6 h-6" />} label="Profile" />
+              <NavItem to="/shop" icon={<IconShop className="w-6 h-6" />} label="Shop" />
+              <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="Hist" />
             </div>
           </nav>
         </div>

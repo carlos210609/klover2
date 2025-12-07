@@ -1,5 +1,5 @@
-import { User, Transaction, TransactionType, TransactionStatus, WithdrawalMethod } from '../types';
-import { REWARD_PER_AD } from '../constants';
+import { User, Transaction, TransactionType, TransactionStatus, WithdrawalMethod, ShopItem } from '../types';
+import { ROULETTE_PRIZES } from '../constants';
 
 // --- LOCAL STORAGE KEYS ---
 const KEY_USER = 'klover_user';
@@ -31,11 +31,9 @@ export const backendService = {
     return !!currentUser;
   },
 
-  // LOGIN METHOD 1: EMAIL (Web/Browser)
   loginWithEmail: async (email: string): Promise<User> => {
     await new Promise(r => setTimeout(r, 800)); 
     
-    // Check if this email matches stored session
     if (currentUser && currentUser.email === email) {
       return currentUser;
     }
@@ -47,6 +45,8 @@ export const backendService = {
       firstName: "Miner",
       photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`, 
       balance: 0.00,
+      spins: 1, // Start with 1 free spin
+      points: 0,
       totalEarnings: 0.00,
       joinDate: new Date().toISOString()
     };
@@ -56,18 +56,11 @@ export const backendService = {
     return currentUser;
   },
 
-  // LOGIN METHOD 2: TELEGRAM (Native App)
   loginWithTelegram: async (initDataUnsafe: any): Promise<User> => {
-    // In a real app, we would send the raw 'initData' string to the backend
-    // to be validated with the Bot Token (840723...). 
-    // Here in the frontend mock, we trust the unsafe data for the UI demo.
-    
     const tgUser = initDataUnsafe.user;
     if (!tgUser) throw new Error("No Telegram user data");
 
-    // Check if we already have this user cached
     if (currentUser && currentUser.id === tgUser.id) {
-      // Update photo/name if changed
       currentUser.firstName = tgUser.first_name;
       currentUser.username = tgUser.username || '';
       currentUser.photoUrl = tgUser.photo_url || currentUser.photoUrl;
@@ -78,10 +71,12 @@ export const backendService = {
     const newUser: User = {
       id: tgUser.id,
       username: tgUser.username || `User${tgUser.id}`,
-      email: `tg_${tgUser.id}`, // Internal ID for Telegram users
+      email: `tg_${tgUser.id}`,
       firstName: tgUser.first_name,
       photoUrl: tgUser.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${tgUser.first_name}`,
       balance: 0.00,
+      spins: 1, // Start with 1 free spin
+      points: 0,
       totalEarnings: 0.00,
       joinDate: new Date().toISOString()
     };
@@ -96,7 +91,8 @@ export const backendService = {
     localStorage.removeItem(KEY_USER);
   },
 
-  creditReward: async (): Promise<{ success: boolean; newBalance: number; message: string }> => {
+  // REPLACED: Grants a SPIN instead of cash
+  creditReward: async (): Promise<{ success: boolean; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
 
     const now = Date.now();
@@ -105,32 +101,102 @@ export const backendService = {
       throw new Error("Rate limit exceeded. Try again later.");
     }
     
-    // Simple cooldown
     if (adViewTimestamps.length > 0) {
       const last = adViewTimestamps[adViewTimestamps.length - 1];
       if (now - last < 5000) throw new Error("Too fast");
     }
 
     adViewTimestamps.push(now);
-    currentUser.balance += REWARD_PER_AD;
-    currentUser.totalEarnings += REWARD_PER_AD;
+    currentUser.spins += 1;
     
+    saveToStorage(KEY_ADS, adViewTimestamps);
+    saveToStorage(KEY_USER, currentUser);
+
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true, message: "+1 Spin Added" };
+  },
+
+  // NEW: Play Roulette Logic
+  spinRoulette: async (): Promise<{ prize: typeof ROULETTE_PRIZES[0], user: User }> => {
+    if (!currentUser) throw new Error("Unauthorized");
+    if (currentUser.spins <= 0) throw new Error("No spins available");
+
+    // Deduct Spin
+    currentUser.spins -= 1;
+
+    // Weighted RNG
+    const totalWeight = ROULETTE_PRIZES.reduce((acc, p) => acc + p.weight, 0);
+    let random = Math.random() * totalWeight;
+    let selectedPrize = ROULETTE_PRIZES[0];
+
+    for (const prize of ROULETTE_PRIZES) {
+      if (random < prize.weight) {
+        selectedPrize = prize;
+        break;
+      }
+      random -= prize.weight;
+    }
+
+    // Apply Prize
+    if (selectedPrize.type === 'CASH') {
+      currentUser.balance += selectedPrize.value;
+      currentUser.totalEarnings += selectedPrize.value;
+    } else {
+      currentUser.points += selectedPrize.value;
+    }
+
+    // Record Transaction
     const tx: Transaction = {
-      id: `tx_${Date.now()}`,
+      id: `spin_${Date.now()}`,
       type: TransactionType.EARN,
-      amount: REWARD_PER_AD,
+      amount: selectedPrize.value,
+      currency: selectedPrize.type === 'CASH' ? 'USD' : 'PTS',
       status: TransactionStatus.COMPLETED,
-      timestamp: now,
-      details: "Ad Reward"
+      timestamp: Date.now(),
+      details: "Lucky Spin Reward"
     };
     transactions.unshift(tx);
 
-    saveToStorage(KEY_ADS, adViewTimestamps);
     saveToStorage(KEY_USER, currentUser);
     saveToStorage(KEY_TXS, transactions);
 
-    await new Promise(r => setTimeout(r, 500));
-    return { success: true, newBalance: currentUser.balance, message: "Reward Credited" };
+    return { prize: selectedPrize, user: currentUser };
+  },
+
+  // NEW: Buy Shop Item
+  buyShopItem: async (item: ShopItem): Promise<{ success: boolean; message: string }> => {
+    if (!currentUser) throw new Error("Unauthorized");
+    
+    if (item.currency === 'PTS') {
+      if (currentUser.points < item.price) throw new Error("Insufficient Points");
+      currentUser.points -= item.price;
+    } else {
+      // Future logic for USD items
+    }
+
+    // Effect Logic (Mocked)
+    if (item.id === 'cash_conversion_1') {
+      currentUser.balance += 0.01;
+      currentUser.totalEarnings += 0.01;
+    } else if (item.id === 'buy_spin') {
+      currentUser.spins += 5;
+    }
+
+    const tx: Transaction = {
+      id: `shop_${Date.now()}`,
+      type: TransactionType.SHOP_PURCHASE,
+      amount: item.price,
+      currency: 'PTS',
+      status: TransactionStatus.COMPLETED,
+      timestamp: Date.now(),
+      details: `Bought: ${item.name}`
+    };
+    transactions.unshift(tx);
+
+    saveToStorage(KEY_USER, currentUser);
+    saveToStorage(KEY_TXS, transactions);
+
+    return { success: true, message: `Purchased ${item.name}` };
   },
 
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
@@ -143,6 +209,7 @@ export const backendService = {
       id: `wd_${Date.now()}`,
       type: TransactionType.WITHDRAWAL,
       amount: amount,
+      currency: 'USD',
       method: method,
       status: TransactionStatus.PENDING,
       timestamp: Date.now(),

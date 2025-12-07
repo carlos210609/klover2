@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -6,10 +7,11 @@ import Earn from './pages/Earn';
 import Wallet from './pages/Wallet';
 import History from './pages/History';
 import Login from './pages/Login';
+import Shop from './pages/Shop';
 import { backendService } from './services/mockBackend';
 
 // Auth Guard Component
-const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+const RequireAuth = ({ children }: { children?: React.ReactNode }) => {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -52,6 +54,17 @@ const Profile = () => {
            <p className="text-xs text-blue-400 mb-4 font-mono">@{user.username}</p>
         )}
 
+        <div className="grid grid-cols-2 gap-2 mb-6">
+           <div className="bg-black/40 p-2 rounded border border-white/5">
+             <p className="text-[10px] text-white/40">Spins</p>
+             <p className="font-mono text-blue-400">{user.spins}</p>
+           </div>
+           <div className="bg-black/40 p-2 rounded border border-white/5">
+             <p className="text-[10px] text-white/40">Points</p>
+             <p className="font-mono text-purple-400">{user.points}</p>
+           </div>
+        </div>
+
         <div className="mt-6 border-t border-white/5 pt-4">
             <button className="text-xs text-red-400 border border-red-500/20 bg-red-500/5 px-4 py-2 rounded-lg hover:bg-red-500/10 transition-colors uppercase tracking-wider" onClick={() => {
               backendService.logout();
@@ -75,12 +88,17 @@ const AppContent = () => {
       // 1. Check if running inside Telegram
       if (window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        try {
-            tg.setHeaderColor('#000000');
-            tg.setBackgroundColor('#000000');
-        } catch (e) {}
+        
+        // Only trigger native UI events if we are actually in a Telegram environment
+        // 'unknown' usually means standard web browser / DevTools
+        if (tg.platform !== 'unknown') {
+            tg.ready();
+            tg.expand();
+            try {
+                tg.setHeaderColor('#000000');
+                tg.setBackgroundColor('#000000');
+            } catch (e) {}
+        }
 
         // 2. If inside Telegram and has user data, Auto-Login
         if (tg.initDataUnsafe?.user) {
@@ -122,6 +140,7 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
       <Route path="/earn" element={<RequireAuth><Earn /></RequireAuth>} />
+      <Route path="/shop" element={<RequireAuth><Shop /></RequireAuth>} />
       <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
       <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
       <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
@@ -130,7 +149,7 @@ const AppContent = () => {
   );
 }
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <HashRouter>
       <Layout>

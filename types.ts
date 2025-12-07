@@ -1,10 +1,13 @@
+
 export interface User {
   id: string | number;
   username: string;
-  email: string; // Added email field
+  email: string;
   firstName?: string;
   photoUrl?: string;
   balance: number;
+  spins: number; // New: Available roulette spins
+  points: number; // New: Loyalty points
   totalEarnings: number;
   joinDate: string;
 }
@@ -12,6 +15,8 @@ export interface User {
 export enum TransactionType {
   EARN = 'EARN',
   WITHDRAWAL = 'WITHDRAWAL',
+  SHOP_PURCHASE = 'SHOP_PURCHASE',
+  CONVERSION = 'CONVERSION'
 }
 
 export enum WithdrawalMethod {
@@ -28,11 +33,21 @@ export enum TransactionStatus {
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: number;
+  amount: number; // Amount or Points
+  currency?: 'USD' | 'PTS';
   method?: WithdrawalMethod;
   status: TransactionStatus;
   timestamp: number;
   details?: string;
+}
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: 'USD' | 'PTS';
+  icon: string;
 }
 
 export interface AdConfig {
@@ -56,9 +71,9 @@ export interface TelegramWebApp {
   initData: string;
   initDataUnsafe: any;
   colorScheme: 'light' | 'dark';
+  platform: string;
 }
 
-// Extend Window to include the ad function and Telegram
 declare global {
   interface Window {
     Telegram: {
