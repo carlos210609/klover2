@@ -11,33 +11,37 @@ const Layout = ({ children }: LayoutProps) => {
   const showNav = location.pathname !== '/login';
 
   return (
-    <div className="relative h-[100dvh] w-full bg-transparent text-white overflow-hidden font-sans selection:bg-cyan-500 selection:text-white flex flex-col">
-      {/* 3D Parallax Background Effects - COLORED NOW */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <div className="relative h-[100dvh] w-full bg-slate-950 text-white font-sans selection:bg-cyan-500 selection:text-white flex flex-col overflow-hidden">
+      
+      {/* FIXED Background Layer - Stays behind everything */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Deep Space Background Base */}
+        <div className="absolute inset-0 bg-slate-950"></div>
+
         {/* Top Purple Glow */}
-        <div className="absolute top-[-15%] left-[-15%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[120px] animate-pulse-slow mix-blend-screen"></div>
+        <div className="absolute top-[-20%] left-[-20%] w-[80vw] h-[80vw] bg-purple-900/20 rounded-full blur-[100px] animate-pulse-slow"></div>
         
         {/* Bottom Blue/Cyan Glow */}
-        <div className="absolute bottom-[-10%] right-[-20%] w-[500px] h-[500px] bg-blue-900/30 rounded-full blur-[100px] animate-float mix-blend-screen"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[70vw] h-[70vw] bg-blue-900/20 rounded-full blur-[80px] animate-float"></div>
         
         {/* Center Accent */}
-        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-indigo-900/20 rounded-full blur-[80px]"></div>
+        <div className="absolute top-[30%] left-[20%] w-[50vw] h-[50vw] bg-indigo-900/10 rounded-full blur-[60px]"></div>
 
-        {/* Grid Overlay - Slightly lighter to show depth */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_60%,transparent_100%)]"></div>
+        {/* Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
       </div>
 
-      {/* Main Content Area - Scrollable */}
+      {/* Main Content Area - Scrollable z-10 */}
       <main className={`relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 max-w-md mx-auto w-full ${showNav ? 'pb-32 pt-6' : 'pb-6 pt-6'}`}>
         {children}
       </main>
 
-      {/* Glass Navigation - Fixed at bottom */}
+      {/* Glass Navigation - Fixed at bottom z-50 */}
       {showNav && (
         <div className="absolute bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
           <nav className="relative w-[90%] max-w-sm pointer-events-auto">
-            {/* Glass Effect - Darker Slate Tint */}
-            <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
+            {/* Glass Effect */}
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"></div>
             
             {/* Nav Items */}
             <div className="relative flex justify-between items-center p-4 px-6">
@@ -61,7 +65,7 @@ const NavItem = ({ to, icon, label, activeClass }: { to: string; icon: React.Rea
       `flex flex-col items-center gap-1 transition-all duration-300 group ${
         isActive 
           ? activeClass || 'text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]' 
-          : 'text-slate-400 hover:text-white'
+          : 'text-slate-500 hover:text-white'
       }`
     }
   >
