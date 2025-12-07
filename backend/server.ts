@@ -1,10 +1,9 @@
 /**
  * KLOVER BACKEND - Node.js / Express
- * This file contains the server logic for the Standalone Web App.
- * In a real deployment, this runs on a VPS/Heroku/Render.
+ * Real implementation for Telegram Authentication
  */
 
-/* 
+/*
 import express from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
@@ -13,119 +12,78 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 // --- CONFIG ---
 const PORT = process.env.PORT || 3000;
-const ADMIN_ID = process.env.ADMIN_ID;
+// SECURITY WARNING: In production, use process.env.BOT_TOKEN
+const BOT_TOKEN = "8407232561:AAES_3QNfxtOUYFBbvS9MJlCM6ZIYZwf5B4"; 
 
-// --- DATABASE MOCK (Use PostgreSQL/MongoDB in production) ---
+// --- DATABASE MOCK ---
 const db = {
-  users: new Map(), // key: device_id, value: UserObj
-  transactions: [],
-  pendingWithdrawals: []
+  users: new Map(), // key: user_id (or email), value: UserObj
+  transactions: []
 };
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// --- MIDDLEWARE: Device Auth Validation ---
-// For a standalone PWA without email/pass, we use a persistent Device ID generated on the client.
-const validateDeviceAuth = (req, res, next) => {
-  const deviceId = req.headers['x-device-id'];
-  
-  if (!deviceId) {
-    return res.status(401).json({ error: 'Device ID required' });
+// --- HELPER: Validate Telegram WebApp Data ---
+const verifyTelegramWebAppData = (telegramInitData) => {
+  const urlParams = new URLSearchParams(telegramInitData);
+  const hash = urlParams.get('hash');
+  urlParams.delete('hash');
+  urlParams.sort();
+
+  let dataCheckString = '';
+  for (const [key, value] of urlParams.entries()) {
+    dataCheckString += `${key}=${value}\n`;
   }
+  dataCheckString = dataCheckString.slice(0, -1);
 
-  // In a real app, you might sign this ID with a JWT after the first handshake
-  req.deviceId = deviceId;
-  next();
+  const secret = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+  const calculatedHash = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
+
+  return calculatedHash === hash;
 };
-
-// --- ANTI-FRAUD: Rate Limiter ---
-const adLimiter = new RateLimiterMemory({
-  points: 20, // 20 ads
-  duration: 3600, // per hour
-});
 
 // --- ENDPOINTS ---
 
-// 1. Auth/Login (Get or Create User by Device ID)
-app.post('/api/auth', validateDeviceAuth, (req, res) => {
-  let user = db.users.get(req.deviceId);
+// 1. Auth: Unified (Telegram OR Email)
+app.post('/api/auth/telegram', (req, res) => {
+  const { initData } = req.body;
+
+  if (!initData) {
+    return res.status(400).json({ error: 'No initData provided' });
+  }
+
+  // 1. Validate the data came from Telegram using your Bot Token
+  const isValid = verifyTelegramWebAppData(initData);
+  
+  if (!isValid) {
+    return res.status(403).json({ error: 'Invalid Telegram data' });
+  }
+
+  // 2. Extract User Data
+  const urlParams = new URLSearchParams(initData);
+  const userJson = urlParams.get('user');
+  const telegramUser = JSON.parse(userJson);
+
+  // 3. Find or Create User in DB
+  let user = db.users.get(telegramUser.id.toString());
   
   if (!user) {
-    // Register new user
-    user = { 
-      id: req.deviceId, 
-      username: `User_${Math.floor(Math.random() * 100000)}`, 
-      balance: 0, 
-      joined: Date.now() 
+    user = {
+      id: telegramUser.id,
+      username: telegramUser.username,
+      email: `${telegramUser.id}@telegram.user`, // Internal placeholder
+      firstName: telegramUser.first_name,
+      photoUrl: telegramUser.photo_url || null,
+      balance: 0.00,
+      totalEarnings: 0.00,
+      joinDate: new Date().toISOString()
     };
-    db.users.set(req.deviceId, user);
-  }
-  
-  res.json({ user });
-});
-
-// 2. Ad Reward
-app.post('/api/earn/ad-complete', validateDeviceAuth, async (req, res) => {
-  try {
-    await adLimiter.consume(req.deviceId); // Consume 1 point
-    
-    const user = db.users.get(req.deviceId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const reward = 0.001; // $0.001 per ad
-    
-    user.balance += reward;
-    
-    // Log transaction
-    const tx = {
-      userId: user.id,
-      type: 'EARN',
-      amount: reward,
-      timestamp: Date.now(),
-      status: 'COMPLETED'
-    };
-
-    db.transactions.push(tx);
-
-    res.json({ success: true, newBalance: user.balance });
-
-  } catch (rejRes) {
-    res.status(429).json({ error: 'Rate limit exceeded: Too many ads watched recently' });
-  }
-});
-
-// 3. Withdraw (CWallet / FaucetPay)
-app.post('/api/withdraw', validateDeviceAuth, async (req, res) => {
-  const { method, amount, address } = req.body;
-  const user = db.users.get(req.deviceId);
-
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  if (user.balance < amount) {
-    return res.status(400).json({ error: 'Insufficient balance' });
+    db.users.set(telegramUser.id.toString(), user);
   }
 
-  // Deduct balance immediately to prevent double-spend
-  user.balance -= amount;
-
-  // In production: Call CWallet/FaucetPay APIs here
-  // const payoutResult = await cwalletApi.send(amount, address);
-  
-  const tx = {
-    userId: user.id,
-    type: 'WITHDRAWAL',
-    method,
-    amount,
-    address,
-    status: 'PENDING', // Pending manual review or API callback
-    txId: 'TX_' + crypto.randomBytes(4).toString('hex'),
-    timestamp: Date.now()
-  };
-  
-  db.transactions.push(tx);
-  res.json({ success: true, tx });
+  res.json({ user, token: 'session_token_example' });
 });
 
 app.listen(PORT, () => {

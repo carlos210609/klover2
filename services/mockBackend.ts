@@ -21,35 +21,25 @@ const saveToStorage = (key: string, value: any) => {
 };
 
 // --- INITIAL STATE ---
-// We start with null if no user is saved, forcing a login.
 let currentUser: User | null = loadFromStorage<User | null>(KEY_USER, null);
-
 let transactions: Transaction[] = loadFromStorage<Transaction[]>(KEY_TXS, []);
 let adViewTimestamps: number[] = loadFromStorage<number[]>(KEY_ADS, []);
 
-const MIN_TIME_BETWEEN_ADS = 15000; // 15 seconds
-const MAX_ADS_PER_HOUR = 20;
-
 export const backendService = {
   
-  // 1. Check Auth Status
   isAuthenticated: (): boolean => {
     return !!currentUser;
   },
 
-  // 2. Login with Email (Passwordless/FaucetPay ID)
+  // LOGIN METHOD 1: EMAIL (Web/Browser)
   loginWithEmail: async (email: string): Promise<User> => {
-    await new Promise(r => setTimeout(r, 1500)); // Simulate network/handshake
+    await new Promise(r => setTimeout(r, 800)); 
     
-    // In a real app, this would check the backend DB.
-    // For this standalone version, if the stored user matches the email, we return it.
-    // If not, or if no user exists, we create a new identity for this email.
-    
+    // Check if this email matches stored session
     if (currentUser && currentUser.email === email) {
       return currentUser;
     }
 
-    // Create new user or overwrite session
     const newUser: User = {
       id: Math.floor(Math.random() * 1000000),
       username: email.split('@')[0],
@@ -66,38 +56,65 @@ export const backendService = {
     return currentUser;
   },
 
+  // LOGIN METHOD 2: TELEGRAM (Native App)
+  loginWithTelegram: async (initDataUnsafe: any): Promise<User> => {
+    // In a real app, we would send the raw 'initData' string to the backend
+    // to be validated with the Bot Token (840723...). 
+    // Here in the frontend mock, we trust the unsafe data for the UI demo.
+    
+    const tgUser = initDataUnsafe.user;
+    if (!tgUser) throw new Error("No Telegram user data");
+
+    // Check if we already have this user cached
+    if (currentUser && currentUser.id === tgUser.id) {
+      // Update photo/name if changed
+      currentUser.firstName = tgUser.first_name;
+      currentUser.username = tgUser.username || '';
+      currentUser.photoUrl = tgUser.photo_url || currentUser.photoUrl;
+      saveToStorage(KEY_USER, currentUser);
+      return currentUser;
+    }
+
+    const newUser: User = {
+      id: tgUser.id,
+      username: tgUser.username || `User${tgUser.id}`,
+      email: `tg_${tgUser.id}`, // Internal ID for Telegram users
+      firstName: tgUser.first_name,
+      photoUrl: tgUser.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${tgUser.first_name}`,
+      balance: 0.00,
+      totalEarnings: 0.00,
+      joinDate: new Date().toISOString()
+    };
+
+    currentUser = newUser;
+    saveToStorage(KEY_USER, currentUser);
+    return currentUser;
+  },
+
   logout: async (): Promise<void> => {
     currentUser = null;
     localStorage.removeItem(KEY_USER);
-    // Optional: clear other data if you want a fresh start per login
-    // localStorage.removeItem(KEY_TXS);
   },
 
-  // 3. Ad Reward Logic
   creditReward: async (): Promise<{ success: boolean; newBalance: number; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
 
     const now = Date.now();
-    
-    // Anti-Fraud: Rate Limiting
-    const recentAds = adViewTimestamps.filter(t => now - t < 3600000); // last hour
-    if (recentAds.length >= MAX_ADS_PER_HOUR) {
+    const recentAds = adViewTimestamps.filter(t => now - t < 3600000); 
+    if (recentAds.length >= 20) {
       throw new Error("Rate limit exceeded. Try again later.");
     }
-
+    
+    // Simple cooldown
     if (adViewTimestamps.length > 0) {
-      const lastAdTime = adViewTimestamps[adViewTimestamps.length - 1];
-      if (now - lastAdTime < MIN_TIME_BETWEEN_ADS) {
-         throw new Error("Watching too fast. Slow down.");
-      }
+      const last = adViewTimestamps[adViewTimestamps.length - 1];
+      if (now - last < 5000) throw new Error("Too fast");
     }
 
-    // Process Reward
     adViewTimestamps.push(now);
     currentUser.balance += REWARD_PER_AD;
     currentUser.totalEarnings += REWARD_PER_AD;
     
-    // Record Transaction
     const tx: Transaction = {
       id: `tx_${Date.now()}`,
       type: TransactionType.EARN,
@@ -108,24 +125,18 @@ export const backendService = {
     };
     transactions.unshift(tx);
 
-    // Persist
     saveToStorage(KEY_ADS, adViewTimestamps);
     saveToStorage(KEY_USER, currentUser);
     saveToStorage(KEY_TXS, transactions);
 
-    await new Promise(r => setTimeout(r, 500)); // Database latency
+    await new Promise(r => setTimeout(r, 500));
     return { success: true, newBalance: currentUser.balance, message: "Reward Credited" };
   },
 
-  // 4. Withdrawal Logic
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
     if (!currentUser) throw new Error("Unauthorized");
-    
-    if (amount > currentUser.balance) {
-      throw new Error("Insufficient balance");
-    }
+    if (amount > currentUser.balance) throw new Error("Insufficient balance");
 
-    // Deduct Balance
     currentUser.balance -= amount;
 
     const tx: Transaction = {
@@ -133,18 +144,16 @@ export const backendService = {
       type: TransactionType.WITHDRAWAL,
       amount: amount,
       method: method,
-      status: TransactionStatus.PENDING, // Pending until admin/auto-process checks
+      status: TransactionStatus.PENDING,
       timestamp: Date.now(),
       details: `To: ${address}`
     };
     
     transactions.unshift(tx);
     
-    // Persist
     saveToStorage(KEY_USER, currentUser);
     saveToStorage(KEY_TXS, transactions);
     
-    // Simulate Processing time
     setTimeout(() => {
         const t = transactions.find(tr => tr.id === tx.id);
         if(t) {
@@ -156,7 +165,6 @@ export const backendService = {
     return tx;
   },
 
-  // 5. Get Data
   getUser: async (): Promise<User> => {
     if (!currentUser) throw new Error("Not authenticated");
     return currentUser;
