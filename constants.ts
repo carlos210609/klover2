@@ -21,8 +21,8 @@ export const ROUTES = {
 };
 
 export const MIN_WITHDRAWAL = {
-  CWALLET: 0.1,
-  FAUCETPAY: 0.05
+  CWALLET: 0.40,
+  FAUCETPAY: 0.40
 };
 
 export const ROULETTE_PRIZES = [
