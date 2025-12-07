@@ -41,6 +41,8 @@ export interface Transaction {
   details?: string;
 }
 
+export type ItemRarity = 'COMMON' | 'RARE' | 'LEGENDARY';
+
 export interface ShopItem {
   id: string;
   name: string;
@@ -48,6 +50,7 @@ export interface ShopItem {
   price: number;
   currency: 'USD' | 'PTS';
   icon: string;
+  rarity: ItemRarity;
 }
 
 export interface AdConfig {

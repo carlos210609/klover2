@@ -91,7 +91,7 @@ export const backendService = {
     localStorage.removeItem(KEY_USER);
   },
 
-  // REPLACED: Grants a SPIN instead of cash
+  // Grants a SPIN instead of cash
   creditReward: async (): Promise<{ success: boolean; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
 
@@ -116,7 +116,7 @@ export const backendService = {
     return { success: true, message: "+1 Spin Added" };
   },
 
-  // NEW: Play Roulette Logic
+  // Play Roulette Logic
   spinRoulette: async (): Promise<{ prize: typeof ROULETTE_PRIZES[0], user: User }> => {
     if (!currentUser) throw new Error("Unauthorized");
     if (currentUser.spins <= 0) throw new Error("No spins available");
@@ -163,7 +163,7 @@ export const backendService = {
     return { prize: selectedPrize, user: currentUser };
   },
 
-  // NEW: Buy Shop Item
+  // Buy Shop Item Logic
   buyShopItem: async (item: ShopItem): Promise<{ success: boolean; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
     
@@ -174,12 +174,28 @@ export const backendService = {
       // Future logic for USD items
     }
 
-    // Effect Logic (Mocked)
-    if (item.id === 'cash_conversion_1') {
-      currentUser.balance += 0.01;
-      currentUser.totalEarnings += 0.01;
-    } else if (item.id === 'buy_spin') {
-      currentUser.spins += 5;
+    // Effect Logic
+    let message = `Purchased ${item.name}`;
+    
+    switch (item.id) {
+        case 'cash_conversion_1':
+            currentUser.balance += 0.01;
+            currentUser.totalEarnings += 0.01;
+            break;
+        case 'buy_spin_5':
+            currentUser.spins += 5;
+            break;
+        case 'golden_ticket':
+            currentUser.spins += 25;
+            message = "Legendary! +25 Spins added.";
+            break;
+        case 'nano_miner':
+            currentUser.balance += 0.05;
+            currentUser.totalEarnings += 0.05;
+            message = "Miner yielded $0.05 instantly.";
+            break;
+        default:
+            break;
     }
 
     const tx: Transaction = {
@@ -196,7 +212,7 @@ export const backendService = {
     saveToStorage(KEY_USER, currentUser);
     saveToStorage(KEY_TXS, transactions);
 
-    return { success: true, message: `Purchased ${item.name}` };
+    return { success: true, message };
   },
 
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
