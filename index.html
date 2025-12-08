@@ -36,6 +36,7 @@
             animation: {
               'float': 'float 6s ease-in-out infinite',
               'spin-slow': 'spin 8s linear infinite',
+              'spin-reverse': 'spinReverse 12s linear infinite',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
               'shimmer': 'shimmer 2s linear infinite',
@@ -44,6 +45,11 @@
               'roll-in-left': 'rollInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
               'roll-in-right': 'rollInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
               'zoom-bounce': 'zoomBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+              'zoom-rotate': 'zoomRotate 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+              'roll-reveal': 'rollReveal 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'swing-drop': 'swingDrop 1.2s ease-out forwards',
+              'elastic-rubber': 'elasticRubber 2s ease-in-out infinite',
+              'tumble': 'tumble 8s linear infinite',
               'jelly': 'jelly 0.9s both',
               'rubber-band': 'rubberBand 1s both',
               'wobble': 'wobble 1s ease-in-out infinite',
@@ -55,6 +61,10 @@
               float: {
                 '0%, 100%': { transform: 'translateY(0)' },
                 '50%': { transform: 'translateY(-20px)' },
+              },
+              spinReverse: {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(-360deg)' },
               },
               fadeInUp: {
                 '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
@@ -86,6 +96,30 @@
                 '50%': { opacity: '1', transform: 'scale(1.1)' },
                 '70%': { transform: 'scale(0.9)' },
                 '100%': { transform: 'scale(1)' },
+              },
+              zoomRotate: {
+                '0%': { opacity: '0', transform: 'scale(0) rotate(-360deg)' },
+                '80%': { transform: 'scale(1.1) rotate(10deg)' },
+                '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' },
+              },
+              rollReveal: {
+                '0%': { opacity: '0', transform: 'translateX(-100%) rotate(-180deg) scale(0.5)' },
+                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg) scale(1)' },
+              },
+              swingDrop: {
+                '0%': { opacity: '0', transform: 'translateY(-100%) rotate(20deg)' },
+                '60%': { transform: 'rotate(-10deg)' },
+                '80%': { transform: 'rotate(5deg)' },
+                '100%': { opacity: '1', transform: 'translateY(0) rotate(0deg)' },
+              },
+              elasticRubber: {
+                '0%, 100%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05, 0.95)' },
+              },
+              tumble: {
+                '0%': { transform: 'translateY(-10px) rotate(0deg)' },
+                '50%': { transform: 'translateY(10px) rotate(180deg)' },
+                '100%': { transform: 'translateY(-10px) rotate(360deg)' },
               },
               jelly: {
                 '0%, 100%': { transform: 'scale3d(1, 1, 1)' },

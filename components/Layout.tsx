@@ -30,16 +30,20 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="absolute top-[40%] left-[60%] w-40 h-40 bg-cyan-900/10 rounded-full blur-[60px] animate-float" style={{ animationDelay: '2s' }}></div>
         
         {/* Rolling Cubes (Decorations) */}
-        <div className="absolute top-[15%] right-[10%] w-6 h-6 border border-white/5 rounded-sm animate-spin-slow opacity-20"></div>
+        <div className="absolute top-[15%] right-[10%] w-6 h-6 border border-white/5 rounded-sm animate-tumble opacity-20"></div>
         <div className="absolute bottom-[15%] left-[5%] w-8 h-8 border border-white/5 rounded-full animate-float opacity-20"></div>
         
+        {/* New Crazy Elements */}
+        <div className="absolute top-[50%] left-[20%] w-4 h-4 bg-white/5 rotate-45 animate-spin-slow opacity-10"></div>
+        <div className="absolute bottom-[40%] right-[30%] w-2 h-12 bg-white/5 -rotate-12 animate-float opacity-10" style={{ animationDuration: '4s' }}></div>
+
         {/* Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 [transform:perspective(500px)_rotateX(20deg)]"></div>
       </div>
 
       {/* Main Content Area - Scrollable z-10 */}
       <main className={`relative z-10 flex-1 overflow-y-auto no-scrollbar px-5 max-w-md mx-auto w-full ${showNav ? 'pb-32 pt-6' : 'pb-6 pt-6'}`}>
-        {/* Page Transition Wrapper */}
+        {/* Page Transition Wrapper - ZOOM IN ENTRY */}
         <div key={location.pathname} className="animate-zoom-bounce origin-center min-h-full">
             {children}
         </div>
@@ -81,7 +85,6 @@ const NavItem = ({ to, icon, label, activeClass }: { to: string; icon: React.Rea
     <div className="transform transition-transform duration-300 group-hover/item:-translate-y-1 group-active/item:scale-90">
       {icon}
     </div>
-    {/* <span className="text-[9px] font-mono tracking-wider opacity-0 group-hover/item:opacity-100 absolute -bottom-4 whitespace-nowrap transition-opacity">{label}</span> */}
   </NavLink>
 );
 
