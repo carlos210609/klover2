@@ -1,14 +1,18 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { backendService } from '../services/mockBackend';
 import { IconLock } from '../components/Icons';
+import { useLanguage } from '../App';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +20,7 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      await backendService.loginWithEmail(email);
+      await backendService.loginWithEmail(email, referralCode || undefined);
       navigate('/');
     } catch (error) {
       console.error("Login failed", error);
@@ -37,34 +41,48 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-sm border-white/20 bg-black/60 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
         <form onSubmit={handleLogin} className="space-y-6 py-4">
           <div className="text-center space-y-2 mb-6">
-            <h2 className="text-lg font-mono text-white uppercase tracking-wider">Identity Uplink</h2>
-            <p className="text-xs text-white/40">Enter your FaucetPay email to connect.</p>
+            <h2 className="text-lg font-mono text-white uppercase tracking-wider">{t('identity_uplink')}</h2>
+            <p className="text-xs text-white/40">{t('login_desc')}</p>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-mono uppercase text-white/50 pl-1">FaucetPay Email</label>
-            <div className="relative group">
-               <input 
-                 type="email" 
-                 value={email}
-                 onChange={(e) => setEmail(e.target.value)}
-                 placeholder="name@example.com"
-                 className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-center font-mono placeholder-white/20 focus:outline-none focus:border-white/40 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300"
-                 required
-               />
-               {/* Decorative corners */}
-               <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/20 rounded-tl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-               <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-white/20 rounded-br opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="space-y-4">
+            {/* Email Input */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-mono uppercase text-white/50 pl-1">{t('email_label')}</label>
+              <div className="relative group">
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-center font-mono placeholder-white/20 focus:outline-none focus:border-white/40 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Referral Code Input */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-mono uppercase text-white/50 pl-1">{t('ref_code_label')}</label>
+              <div className="relative group">
+                <input 
+                  type="text" 
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                  placeholder="12345"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-center font-mono placeholder-white/20 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-all duration-300 text-sm"
+                />
+              </div>
             </div>
           </div>
 
           <Button type="submit" isLoading={loading} className="mt-4 h-14">
-            {loading ? 'ESTABLISHING CONNECTION...' : 'INITIALIZE SESSION'}
+            {loading ? t('establishing') : t('init_session')}
           </Button>
 
           <div className="flex items-center justify-center gap-2 pt-4 opacity-40">
             <IconLock className="w-3 h-3" />
-            <span className="text-[9px] font-mono uppercase tracking-widest">No Password Required</span>
+            <span className="text-[9px] font-mono uppercase tracking-widest">{t('no_pass')}</span>
           </div>
         </form>
       </Card>

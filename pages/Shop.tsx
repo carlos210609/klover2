@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -5,11 +6,13 @@ import { backendService } from '../services/mockBackend';
 import { ShopItem, ItemRarity } from '../types';
 import { SHOP_ITEMS } from '../constants';
 import { IconShop, IconStar, IconRefresh, IconCheck, IconZap } from '../components/Icons';
+import { useLanguage } from '../App';
 
 const Shop: React.FC = () => {
   const [user, setUser] = React.useState<any>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     refreshUser();
@@ -22,7 +25,7 @@ const Shop: React.FC = () => {
     setMsg(null);
     try {
       await backendService.buyShopItem(item);
-      setMsg(`Acquired: ${item.name}`);
+      setMsg(`${t('acquired')}: ${item.name}`);
       refreshUser();
     } catch (e: any) {
       setMsg(e.message);
@@ -53,11 +56,11 @@ const Shop: React.FC = () => {
     <div className="space-y-6 pt-6 animate-fade-in-up pb-24">
        <div className="px-2 flex justify-between items-end">
          <div>
-            <h2 className="text-3xl font-bold font-mono tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">Black Market</h2>
-            <p className="text-white/40 text-xs font-mono tracking-wide">Exchange loyalty for upgrades.</p>
+            <h2 className="text-3xl font-bold font-mono tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">{t('black_market')}</h2>
+            <p className="text-white/40 text-xs font-mono tracking-wide">{t('shop_desc')}</p>
          </div>
          <div className="text-right">
-            <p className="text-[9px] text-purple-300 font-mono uppercase tracking-widest">Balance</p>
+            <p className="text-[9px] text-purple-300 font-mono uppercase tracking-widest">{t('balance')}</p>
             <p className="text-xl font-bold text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">{user.points} PTS</p>
          </div>
        </div>
@@ -93,7 +96,7 @@ const Shop: React.FC = () => {
                   
                   <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/5">
                      <div className="flex items-center gap-1 text-purple-400">
-                        <span className="text-xs text-white/30 uppercase font-mono mr-1">Cost:</span>
+                        <span className="text-xs text-white/30 uppercase font-mono mr-1">{t('cost')}:</span>
                         <IconStar className="w-3 h-3" />
                         <span className="font-mono font-bold text-sm">{item.price}</span>
                      </div>
@@ -104,7 +107,7 @@ const Shop: React.FC = () => {
                        className={`w-auto py-2 px-6 h-8 text-[10px] ${user.points >= item.price ? '' : 'opacity-50'}`}
                        variant={item.rarity === 'LEGENDARY' ? 'primary' : 'secondary'}
                      >
-                       ACQUIRE
+                       {t('acquire')}
                      </Button>
                   </div>
                </Card>

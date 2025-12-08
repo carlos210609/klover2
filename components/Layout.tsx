@@ -1,6 +1,8 @@
+
 import React, { ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { IconHome, IconZap, IconWallet, IconHistory, IconShop } from './Icons';
+import { useLanguage } from '../App';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -9,6 +11,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const showNav = location.pathname !== '/login';
+  const { t } = useLanguage();
 
   return (
     <div className="relative h-[100dvh] w-full bg-slate-950 text-white font-sans selection:bg-cyan-500 selection:text-white flex flex-col overflow-hidden">
@@ -45,11 +48,11 @@ const Layout = ({ children }: LayoutProps) => {
             
             {/* Nav Items */}
             <div className="relative flex justify-between items-center p-4 px-6">
-              <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label="Home" />
-              <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label="Earn" activeClass="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-              <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label="Wallet" />
-              <NavItem to="/shop" icon={<IconShop className="w-6 h-6" />} label="Shop" />
-              <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label="Hist" />
+              <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label={t('nav_home')} />
+              <NavItem to="/earn" icon={<IconZap className="w-6 h-6" />} label={t('nav_earn')} activeClass="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+              <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label={t('nav_wallet')} />
+              <NavItem to="/shop" icon={<IconShop className="w-6 h-6" />} label={t('nav_shop')} />
+              <NavItem to="/history" icon={<IconHistory className="w-6 h-6" />} label={t('nav_hist')} />
             </div>
           </nav>
         </div>

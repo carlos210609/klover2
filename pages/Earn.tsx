@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { backendService } from '../services/mockBackend';
 import { User } from '../types';
 import { ROULETTE_PRIZES } from '../constants';
+import { useLanguage } from '../App';
 
 const Earn: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +13,7 @@ const Earn: React.FC = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [winMessage, setWinMessage] = useState<{label: string, value: number, type: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
   
   const [rotation, setRotation] = useState(0);
 
@@ -64,20 +67,13 @@ const Earn: React.FC = () => {
     setError(null);
 
     try {
-      // 1. Get Result from Backend
       const result = await backendService.spinRoulette();
       
-      // 2. Calculate Visual Rotation
-      // Spin duration 3s.
-      // We spin randomly, then force result logic in backend. 
-      // For this visual reactor, we will spin fast then stop.
-      
       const spinDuration = 3000;
-      const extraSpins = 360 * 8; // Faster spin
+      const extraSpins = 360 * 8; 
       const randomOffset = Math.floor(Math.random() * 360);
       setRotation(rotation + extraSpins + randomOffset);
 
-      // 3. Wait for animation
       setTimeout(() => {
         setIsSpinning(false);
         setWinMessage({
@@ -96,7 +92,6 @@ const Earn: React.FC = () => {
 
   if (!user) return null;
 
-  // Build Conic Gradient based on prizes
   const segmentSize = 360 / ROULETTE_PRIZES.length;
   const gradientString = ROULETTE_PRIZES.map((prize, i) => {
     return `${prize.color} ${i * segmentSize}deg ${(i + 1) * segmentSize}deg`;
@@ -106,9 +101,9 @@ const Earn: React.FC = () => {
     <div className="space-y-6 pt-6 animate-fade-in-up pb-24">
       <div className="text-center space-y-1 relative z-10">
         <h2 className="text-3xl font-mono font-bold uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-          Reactor Core
+          {t('reactor_core')}
         </h2>
-        <p className="text-white/40 text-xs font-mono tracking-widest">INITIATE SEQUENCE</p>
+        <p className="text-white/40 text-xs font-mono tracking-widest">{t('init_seq')}</p>
       </div>
 
       {/* REACTOR UI */}
@@ -138,7 +133,7 @@ const Earn: React.FC = () => {
             <div className="absolute w-12 h-12 rounded-full border border-white/10 animate-spin"></div>
          </div>
 
-         {/* Pointer (Top Triangle) */}
+         {/* Pointer */}
          <div className="absolute top-[3.5rem] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] z-20"></div>
          
          {/* WIN RESULT POPUP */}
@@ -147,7 +142,7 @@ const Earn: React.FC = () => {
               <div className="bg-black/90 backdrop-blur-xl border border-white/20 p-6 rounded-2xl text-center shadow-[0_0_50px_rgba(255,255,255,0.1)] transform scale-110">
                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur opacity-30"></div>
                  <div className="relative">
-                    <p className="text-[10px] text-white/60 font-mono uppercase tracking-widest mb-1">Result</p>
+                    <p className="text-[10px] text-white/60 font-mono uppercase tracking-widest mb-1">{t('result')}</p>
                     <p className={`text-3xl font-bold ${winMessage.type === 'CASH' ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]'}`}>
                       {winMessage.label}
                     </p>
@@ -162,7 +157,7 @@ const Earn: React.FC = () => {
         <div className="relative group">
            {user.spins === 0 && (
              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-500/20 border border-red-500/20 text-red-200 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wide whitespace-nowrap z-10">
-               Core Depleted
+               {t('core_depleted')}
              </div>
            )}
            <Button 
@@ -170,15 +165,15 @@ const Earn: React.FC = () => {
               disabled={user.spins === 0 || isSpinning}
               className={`h-16 text-xl border-blue-500/30 font-bold tracking-widest ${user.spins > 0 ? 'bg-gradient-to-r from-blue-900/40 to-purple-900/40 text-blue-100 hover:border-blue-400/50' : 'opacity-50 grayscale'}`}
            >
-              {isSpinning ? "STABILIZING..." : `ACTIVATE (${user.spins})`}
+              {isSpinning ? t('stabilizing') : `${t('activate')} (${user.spins})`}
            </Button>
         </div>
 
         <Card className="border-white/10 bg-white/5 py-3">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-bold text-sm">Recharge Core</p>
-              <p className="text-white/40 text-[10px] font-mono">Watch ad stream • +1 Charge</p>
+              <p className="text-white font-bold text-sm">{t('recharge_core')}</p>
+              <p className="text-white/40 text-[10px] font-mono">{t('watch_ad')}</p>
             </div>
             <Button 
               onClick={handleWatchAd}
@@ -195,7 +190,7 @@ const Earn: React.FC = () => {
 
       {/* VISUAL PRIZE LEGEND */}
       <div className="px-4 pb-4">
-        <h3 className="text-white/30 text-[9px] uppercase font-mono mb-3 text-center tracking-[0.2em]">Output Potential</h3>
+        <h3 className="text-white/30 text-[9px] uppercase font-mono mb-3 text-center tracking-[0.2em]">{t('output_pot')}</h3>
         <div className="flex flex-wrap justify-center gap-2">
           {ROULETTE_PRIZES.map(prize => (
             <div key={prize.id} className="flex items-center gap-1.5 bg-white/5 rounded px-2 py-1 border border-white/5">

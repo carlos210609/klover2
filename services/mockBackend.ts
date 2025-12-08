@@ -1,5 +1,6 @@
+
 import { User, Transaction, TransactionType, TransactionStatus, WithdrawalMethod, ShopItem } from '../types';
-import { ROULETTE_PRIZES } from '../constants';
+import { ROULETTE_PRIZES, REFERRAL_RATE } from '../constants';
 
 // --- LOCAL STORAGE KEYS ---
 const KEY_USER = 'klover_user';
@@ -32,13 +33,13 @@ export const backendService = {
     return !!currentUser;
   },
 
-  loginWithEmail: async (email: string): Promise<User> => {
+  loginWithEmail: async (email: string, referralCode?: string): Promise<User> => {
     // Call Real Backend to Sync/Create User
     try {
         const res = await fetch(`${API_BASE}/auth/email`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ email, referralCode })
         });
         const data = await res.json();
         if (data.user) {
@@ -51,8 +52,9 @@ export const backendService = {
         console.warn("Backend unavailable, using offline fallback", e);
         // Fallback Logic (Mock)
         if (currentUser && currentUser.email === email) return currentUser;
+        
         const newUser: User = {
-          id: Math.floor(Math.random() * 1000000),
+          id: Math.floor(Math.random() * 1000000).toString(),
           username: email.split('@')[0],
           email: email,
           firstName: "Miner",
@@ -61,7 +63,9 @@ export const backendService = {
           spins: 1, 
           points: 0,
           totalEarnings: 0.00,
-          joinDate: new Date().toISOString()
+          joinDate: new Date().toISOString(),
+          referralEarnings: 0,
+          referredBy: referralCode
         };
         currentUser = newUser;
         saveToStorage(KEY_USER, currentUser);
@@ -69,7 +73,7 @@ export const backendService = {
     }
   },
 
-  loginWithTelegram: async (initDataUnsafe: any): Promise<User> => {
+  loginWithTelegram: async (initDataUnsafe: any, referralCode?: string): Promise<User> => {
      // Simplified for this context, normally would POST initData to backend
     const tgUser = initDataUnsafe.user;
     if (!tgUser) throw new Error("No Telegram user data");
@@ -92,7 +96,9 @@ export const backendService = {
       spins: 1, // Start with 1 free spin
       points: 0,
       totalEarnings: 0.00,
-      joinDate: new Date().toISOString()
+      joinDate: new Date().toISOString(),
+      referralEarnings: 0,
+      referredBy: referralCode
     };
 
     currentUser = newUser;
@@ -105,7 +111,6 @@ export const backendService = {
     localStorage.removeItem(KEY_USER);
   },
 
-  // Grants a SPIN instead of cash
   creditReward: async (): Promise<{ success: boolean; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
 
@@ -137,7 +142,7 @@ export const backendService = {
     return { success: true, message: "+1 Spin Added" };
   },
 
-  // Play Roulette Logic
+  // Play Roulette Logic with REFERRAL COMMISSION
   spinRoulette: async (): Promise<{ prize: typeof ROULETTE_PRIZES[0], user: User }> => {
     if (!currentUser) throw new Error("Unauthorized");
     if (currentUser.spins <= 0) throw new Error("No spins available");
@@ -164,6 +169,25 @@ export const backendService = {
       currentUser.totalEarnings += selectedPrize.value;
     } else {
       currentUser.points += selectedPrize.value;
+    }
+
+    // --- REFERRAL COMMISSION LOGIC (Simulation) ---
+    if (currentUser.referredBy) {
+        // Calculate 30% commission
+        const commissionAmount = selectedPrize.value * REFERRAL_RATE;
+        console.log(`Crediting Referrer ${currentUser.referredBy}: ${commissionAmount} (${selectedPrize.type})`);
+        
+        // In a real app, we would POST to backend here to update the referrer's balance.
+        // For this mock, we pretend it works.
+        fetch(`${API_BASE}/action/referral`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                referrerId: currentUser.referredBy, 
+                amount: commissionAmount, 
+                currency: selectedPrize.type === 'CASH' ? 'USD' : 'PTS' 
+            })
+        }).catch(() => {});
     }
 
     // Record Transaction
@@ -196,7 +220,6 @@ export const backendService = {
     return { prize: selectedPrize, user: currentUser };
   },
 
-  // Buy Shop Item Logic
   buyShopItem: async (item: ShopItem): Promise<{ success: boolean; message: string }> => {
     if (!currentUser) throw new Error("Unauthorized");
     
@@ -205,9 +228,7 @@ export const backendService = {
       currentUser.points -= item.price;
     }
 
-    // Effect Logic
     let message = `Purchased ${item.name}`;
-    
     switch (item.id) {
         case 'cash_conversion_1':
             currentUser.balance += 0.01;
@@ -249,7 +270,6 @@ export const backendService = {
   withdraw: async (method: WithdrawalMethod, amount: number, address: string): Promise<Transaction> => {
     if (!currentUser) throw new Error("Unauthorized");
 
-    // TRY REAL BACKEND WITHDRAWAL
     try {
         const response = await fetch(`${API_BASE}/withdraw`, {
             method: 'POST',
@@ -268,13 +288,11 @@ export const backendService = {
             throw new Error(data.error || "Withdrawal failed");
         }
 
-        // Update Local State based on backend success
         if (data.newBalance !== undefined) {
             currentUser.balance = data.newBalance;
             saveToStorage(KEY_USER, currentUser);
         }
         
-        // Add to local transactions list for UI display
         if (data.transaction) {
             transactions.unshift(data.transaction);
             saveToStorage(KEY_TXS, transactions);
@@ -285,7 +303,7 @@ export const backendService = {
 
     } catch (e: any) {
         console.error("Backend Withdrawal Failed:", e);
-        throw e; // Propagate error to UI
+        throw e; 
     }
   },
 

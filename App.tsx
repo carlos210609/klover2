@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -9,8 +9,46 @@ import History from './pages/History';
 import Login from './pages/Login';
 import Shop from './pages/Shop';
 import { backendService } from './services/mockBackend';
+import { TRANSLATIONS } from './constants';
+import { Language } from './types';
 
-// Auth Guard Component
+// --- LANGUAGE CONTEXT ---
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: keyof typeof TRANSLATIONS.en) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType>({
+  language: 'en',
+  setLanguage: () => {},
+  t: (key) => key,
+});
+
+export const useLanguage = () => useContext(LanguageContext);
+
+const LanguageProvider = ({ children }: { children?: React.ReactNode }) => {
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('klover_lang');
+    return (saved === 'ru' || saved === 'en') ? saved : 'en';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('klover_lang', language);
+  }, [language]);
+
+  const t = (key: keyof typeof TRANSLATIONS.en) => {
+    return TRANSLATIONS[language][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+// --- AUTH GUARD ---
 const RequireAuth = ({ children }: { children?: React.ReactNode }) => {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
@@ -28,9 +66,10 @@ const RequireAuth = ({ children }: { children?: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Profile Component
+// --- PROFILE COMPONENT ---
 const Profile = () => {
   const [user, setUser] = React.useState<any>(null);
+  const { t, setLanguage, language } = useLanguage();
   
   React.useEffect(() => {
     backendService.getUser().then(setUser).catch(() => {});
@@ -40,7 +79,26 @@ const Profile = () => {
 
   return (
     <div className="pt-10 px-4 text-center animate-fade-in-up">
-      <h2 className="text-xl font-mono mb-4 text-white">Profile Settings</h2>
+      <h2 className="text-xl font-mono mb-4 text-white">{t('profile_settings')}</h2>
+      
+      {/* Lang Toggle */}
+      <div className="flex justify-center mb-6">
+        <div className="bg-white/5 border border-white/10 p-1 rounded-lg flex">
+           <button 
+             onClick={() => setLanguage('en')}
+             className={`px-3 py-1 text-xs font-mono rounded ${language === 'en' ? 'bg-white text-black' : 'text-white/50'}`}
+           >
+             ENGLISH
+           </button>
+           <button 
+             onClick={() => setLanguage('ru')}
+             className={`px-3 py-1 text-xs font-mono rounded ${language === 'ru' ? 'bg-white text-black' : 'text-white/50'}`}
+           >
+             РУССКИЙ
+           </button>
+        </div>
+      </div>
+
       <div className="p-4 border border-white/10 rounded-xl bg-slate-900/50 backdrop-blur-sm">
         <div className="w-16 h-16 rounded-full mx-auto mb-4 border border-white/20 overflow-hidden ring-2 ring-purple-500/20">
           <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -56,11 +114,11 @@ const Profile = () => {
 
         <div className="grid grid-cols-2 gap-2 mb-6">
            <div className="bg-black/30 p-2 rounded border border-white/5">
-             <p className="text-[10px] text-white/40">Spins</p>
+             <p className="text-[10px] text-white/40">{t('spins_avail')}</p>
              <p className="font-mono text-cyan-400">{user.spins}</p>
            </div>
            <div className="bg-black/30 p-2 rounded border border-white/5">
-             <p className="text-[10px] text-white/40">Points</p>
+             <p className="text-[10px] text-white/40">{t('loyalty_pts')}</p>
              <p className="font-mono text-purple-400">{user.points}</p>
            </div>
         </div>
@@ -70,7 +128,7 @@ const Profile = () => {
               backendService.logout();
               window.location.reload();
             }}>
-              Disconnect Session
+              {t('disconnect')}
             </button>
         </div>
       </div>
@@ -78,7 +136,7 @@ const Profile = () => {
   );
 };
 
-// Wrapper to handle Telegram Logic before Routing
+// --- MAIN APP CONTENT ---
 const AppContent = () => {
   const navigate = useNavigate();
   const [isInitializing, setIsInitializing] = useState(true);
@@ -88,25 +146,20 @@ const AppContent = () => {
       // 1. Check if running inside Telegram
       if (window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
-        
-        // Only trigger native UI events if we are actually in a Telegram environment
-        // 'unknown' usually means standard web browser / DevTools
         if (tg.platform !== 'unknown') {
             tg.ready();
             tg.expand();
             try {
-                // MATCHING THE NEW GRADIENT BACKGROUND (Dark Indigo/Slate)
-                tg.setHeaderColor('#1e1b4b'); // Match top of gradient
-                tg.setBackgroundColor('#020617'); // Match bottom of gradient
+                tg.setHeaderColor('#1e1b4b'); 
+                tg.setBackgroundColor('#020617');
             } catch (e) {}
         }
 
-        // 2. If inside Telegram and has user data, Auto-Login
         if (tg.initDataUnsafe?.user) {
           try {
-            console.log("Telegram User detected:", tg.initDataUnsafe.user);
-            await backendService.loginWithTelegram(tg.initDataUnsafe);
-            // If success, stay on protected routes (default)
+            // Check start_param for referral
+            const startParam = tg.initDataUnsafe.start_param;
+            await backendService.loginWithTelegram(tg.initDataUnsafe, startParam);
             setIsInitializing(false);
             return; 
           } catch (e) {
@@ -152,11 +205,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <HashRouter>
-      <Layout>
-        <AppContent />
-      </Layout>
-    </HashRouter>
+    <LanguageProvider>
+      <HashRouter>
+        <Layout>
+          <AppContent />
+        </Layout>
+      </HashRouter>
+    </LanguageProvider>
   );
 };
 

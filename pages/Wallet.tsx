@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -5,6 +6,7 @@ import { WithdrawalMethod } from '../types';
 import { backendService } from '../services/mockBackend';
 import { MIN_WITHDRAWAL } from '../constants';
 import { IconLock } from '../components/Icons';
+import { useLanguage } from '../App';
 
 const Wallet: React.FC = () => {
   const [balance, setBalance] = useState(0);
@@ -13,6 +15,7 @@ const Wallet: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     backendService.getUser().then(u => setBalance(u.balance));
@@ -25,16 +28,15 @@ const Wallet: React.FC = () => {
 
     const numAmount = parseFloat(amount);
 
-    // Frontend validation
     if (isNaN(numAmount) || numAmount < MIN_WITHDRAWAL[method]) {
-        setMessage({type: 'error', text: `Minimum withdrawal is $${MIN_WITHDRAWAL[method]}`});
+        setMessage({type: 'error', text: `${t('error_min')} $${MIN_WITHDRAWAL[method]}`});
         setLoading(false);
         return;
     }
 
     try {
       await backendService.withdraw(method, numAmount, address);
-      setMessage({type: 'success', text: 'Withdrawal request sent successfully!'});
+      setMessage({type: 'success', text: t('success_withdraw')});
       const u = await backendService.getUser();
       setBalance(u.balance);
       setAmount('');
@@ -48,12 +50,12 @@ const Wallet: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="px-2">
-        <h2 className="text-2xl font-bold font-mono text-white tracking-tight">Withdraw Funds</h2>
+        <h2 className="text-2xl font-bold font-mono text-white tracking-tight">{t('withdraw_funds')}</h2>
       </div>
 
       <Card className="bg-gradient-to-br from-white/10 to-transparent border-white/20 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-         <p className="text-xs text-white/50 font-mono mb-1 uppercase tracking-widest">Available Balance</p>
+         <p className="text-xs text-white/50 font-mono mb-1 uppercase tracking-widest">{t('avail_bal')}</p>
          <p className="text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">${balance.toFixed(4)}</p>
       </Card>
 
@@ -69,7 +71,7 @@ const Wallet: React.FC = () => {
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
-            CWALLET
+            {t('method_cwallet')}
           </button>
           <button
             type="button"
@@ -80,7 +82,7 @@ const Wallet: React.FC = () => {
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
-            FAUCETPAY
+            {t('method_faucetpay')}
           </button>
         </div>
 
@@ -88,7 +90,7 @@ const Wallet: React.FC = () => {
         <Card className="space-y-4">
           <div>
             <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">
-              {method === WithdrawalMethod.CWALLET ? 'CWallet Email / ID' : 'FaucetPay Address'}
+              {method === WithdrawalMethod.CWALLET ? t('label_cwallet') : t('label_faucetpay')}
             </label>
             <input
               type="text"
@@ -101,7 +103,7 @@ const Wallet: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">Amount (USD)</label>
+            <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">{t('label_amount')}</label>
             <div className="relative group">
               <span className="absolute left-3 top-3 text-white/40 group-focus-within:text-white transition-colors">$</span>
               <input
@@ -115,13 +117,13 @@ const Wallet: React.FC = () => {
               />
             </div>
             <p className="text-[10px] text-white/30 mt-2 text-right font-mono">
-              Min: ${MIN_WITHDRAWAL[method]}
+              {t('min_withdraw')}: ${MIN_WITHDRAWAL[method]}
             </p>
           </div>
         </Card>
 
         <Button type="submit" isLoading={loading} className="mt-4">
-           {loading ? 'PROCESSING TRANSACTION...' : 'CONFIRM WITHDRAWAL'}
+           {loading ? t('process_tx') : t('confirm_withdraw')}
         </Button>
       </form>
       
@@ -137,7 +139,7 @@ const Wallet: React.FC = () => {
 
       <div className="flex justify-center items-center gap-2 text-[10px] text-white/30 uppercase tracking-widest font-mono">
         <IconLock className="w-3 h-3" />
-        Secure Encrypted Transaction
+        {t('secure_tx')}
       </div>
     </div>
   );

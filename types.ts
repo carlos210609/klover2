@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: string | number;
   username: string;
@@ -6,16 +7,22 @@ export interface User {
   firstName?: string;
   photoUrl?: string;
   balance: number;
-  spins: number; // New: Available roulette spins
-  points: number; // New: Loyalty points
+  spins: number; 
+  points: number; 
   totalEarnings: number;
   joinDate: string;
+  // Referral System
+  referredBy?: string; // ID of the user who invited this user
+  referralEarnings: number; // Amount earned from inviting others
 }
+
+export type Language = 'en' | 'ru';
 
 export enum TransactionType {
   EARN = 'EARN',
   WITHDRAWAL = 'WITHDRAWAL',
   SHOP_PURCHASE = 'SHOP_PURCHASE',
+  REFERRAL = 'REFERRAL',
   CONVERSION = 'CONVERSION'
 }
 
