@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger';
@@ -11,25 +11,36 @@ const Button: React.FC<ButtonProps> = ({
   isLoading, 
   className = '', 
   disabled,
+  onClick,
   ...props 
 }) => {
-  const baseStyle = "relative w-full py-4 px-6 rounded-xl font-mono font-bold uppercase tracking-wider text-sm transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group";
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || isLoading) return;
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 300); // Reset animation
+    if (onClick) onClick(e);
+  };
+
+  const baseStyle = "relative w-full py-4 px-6 rounded-xl font-mono font-bold uppercase tracking-wider text-sm transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group active:scale-90 hover:scale-[1.02] hover:rotate-1";
   
   const variants = {
-    primary: "bg-white text-black hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] border border-transparent",
-    secondary: "bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/30 backdrop-blur-md",
-    danger: "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20"
+    primary: "bg-white text-black hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] border border-transparent hover:animate-jelly",
+    secondary: "bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/30 backdrop-blur-md hover:animate-wobble",
+    danger: "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 hover:rotate-3"
   };
 
   return (
     <button 
-      className={`${baseStyle} ${variants[variant]} ${className}`}
+      className={`${baseStyle} ${variants[variant]} ${isClicked ? 'animate-rubber-band' : ''} ${className}`}
       disabled={disabled || isLoading}
+      onClick={handleClick}
       {...props}
     >
       {/* Shimmer effect */}
       {!isLoading && (
-        <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent z-10 pointer-events-none skew-x-12"></div>
       )}
       
       {/* Loading Overlay */}

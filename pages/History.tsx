@@ -35,15 +35,15 @@ const History: React.FC = () => {
           transactions.map((tx, index) => (
             <div 
               key={tx.id} 
-              className="relative group perspective-1000"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="relative group perspective-1000 animate-roll-in-left opacity-0"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="relative transform transition-all duration-500 ease-out preserve-3d group-hover:[transform:rotateX(5deg)_scale(1.02)] origin-center">
                 {/* Glow Background */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 
-                {/* Card Content */}
-                <div className="relative bg-black/40 border border-white/10 rounded-xl p-4 flex justify-between items-center backdrop-blur-md shadow-lg group-hover:bg-black/60 group-hover:border-white/20">
+                {/* Card Content with White Neon Glow on Hover */}
+                <div className="relative bg-black/40 border border-white/10 rounded-xl p-4 flex justify-between items-center backdrop-blur-md shadow-lg transition-all duration-300 group-hover:bg-black/60 group-hover:border-white/50 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-xl ${
                       tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL

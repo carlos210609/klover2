@@ -39,6 +39,14 @@
               'shimmer': 'shimmer 2s linear infinite',
               'victory-pop': 'victoryPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
               'flash': 'flash 0.5s ease-in-out',
+              // NEW FUNNY ANIMATIONS
+              'roll-in-left': 'rollInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'roll-in-right': 'rollInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'zoom-bounce': 'zoomBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+              'jelly': 'jelly 0.9s both',
+              'rubber-band': 'rubberBand 1s both',
+              'wobble': 'wobble 1s ease-in-out infinite',
+              'pop-in': 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
             },
             keyframes: {
               float: {
@@ -54,14 +62,57 @@
                 '100%': { transform: 'translateX(100%)' },
               },
               victoryPop: {
-                '0%': { opacity: '0', transform: 'scale(0.5)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
+                '0%': { opacity: '0', transform: 'scale(0.5) rotate(-45deg)' },
+                '70%': { transform: 'scale(1.2) rotate(10deg)' },
+                '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' },
               },
               flash: {
                 '0%, 100%': { opacity: '1' },
                 '50%': { opacity: '0.5' },
+              },
+              // NEW KEYFRAMES
+              rollInLeft: {
+                '0%': { opacity: '0', transform: 'translateX(-100%) rotate(-120deg)' },
+                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg)' },
+              },
+              rollInRight: {
+                '0%': { opacity: '0', transform: 'translateX(100%) rotate(120deg)' },
+                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg)' },
+              },
+              zoomBounce: {
+                '0%': { opacity: '0', transform: 'scale(0.3)' },
+                '50%': { opacity: '1', transform: 'scale(1.1)' },
+                '70%': { transform: 'scale(0.9)' },
+                '100%': { transform: 'scale(1)' },
+              },
+              jelly: {
+                '0%, 100%': { transform: 'scale3d(1, 1, 1)' },
+                '30%': { transform: 'scale3d(1.25, 0.75, 1)' },
+                '40%': { transform: 'scale3d(0.75, 1.25, 1)' },
+                '50%': { transform: 'scale3d(1.15, 0.85, 1)' },
+                '65%': { transform: 'scale3d(0.95, 1.05, 1)' },
+                '75%': { transform: 'scale3d(1.05, 0.95, 1)' },
+              },
+              rubberBand: {
+                '0%': { transform: 'scale3d(1, 1, 1)' },
+                '30%': { transform: 'scale3d(1.25, 0.75, 1)' },
+                '40%': { transform: 'scale3d(0.75, 1.25, 1)' },
+                '50%': { transform: 'scale3d(1.15, 0.85, 1)' },
+                '65%': { transform: 'scale3d(0.95, 1.05, 1)' },
+                '75%': { transform: 'scale3d(1.05, 0.95, 1)' },
+                '100%': { transform: 'scale3d(1, 1, 1)' },
+              },
+              wobble: {
+                '0%, 100%': { transform: 'rotate(0deg)' },
+                '25%': { transform: 'rotate(-3deg)' },
+                '75%': { transform: 'rotate(3deg)' },
+              },
+              popIn: {
+                '0%': { opacity: '0', transform: 'scale(0)' },
+                '80%': { transform: 'scale(1.1)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
               }
-            }
+            },
           },
         },
       }
@@ -94,11 +145,17 @@
       .perspective-1000 {
         perspective: 1000px;
       }
+      .perspective-2000 {
+        perspective: 2000px;
+      }
       .preserve-3d {
         transform-style: preserve-3d;
       }
       .backface-hidden {
         backface-visibility: hidden;
+      }
+      .rotate-y-180 {
+        transform: rotateY(180deg);
       }
     </style>
   <script type="importmap">
