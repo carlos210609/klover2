@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -50,85 +49,96 @@ const Wallet: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="px-2">
-        <h2 className="text-2xl font-bold font-mono text-white tracking-tight">{t('withdraw_funds')}</h2>
+        <h2 className="text-xl font-bold font-mono text-white tracking-tight uppercase border-l-4 border-cyan-500 pl-3">{t('withdraw_funds')}</h2>
       </div>
 
-      <Card className="bg-gradient-to-br from-white/10 to-transparent border-white/20 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-         <p className="text-xs text-white/50 font-mono mb-1 uppercase tracking-widest">{t('avail_bal')}</p>
-         <p className="text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">${balance.toFixed(4)}</p>
-      </Card>
+      <div className="relative p-6 rounded-2xl bg-[#0f172a] border border-white/10 overflow-hidden group">
+         <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
+         <p className="text-[10px] text-white/50 font-tech mb-2 uppercase tracking-widest">{t('avail_bal')}</p>
+         <div className="flex items-baseline gap-1">
+             <p className="text-4xl font-mono font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">${balance.toFixed(4)}</p>
+         </div>
+      </div>
 
-      <form onSubmit={handleWithdraw} className="space-y-4">
+      <form onSubmit={handleWithdraw} className="space-y-6">
         {/* Method Selection */}
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => setMethod(WithdrawalMethod.CWALLET)}
-            className={`p-4 rounded-xl border text-xs font-bold font-mono uppercase tracking-wider transition-all duration-300 ${
+            className={`p-4 rounded-xl border text-[10px] font-bold font-mono uppercase tracking-widest transition-all duration-300 relative overflow-hidden ${
               method === WithdrawalMethod.CWALLET 
               ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
+            {method === WithdrawalMethod.CWALLET && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent animate-shimmer skew-x-12"></div>}
             {t('method_cwallet')}
           </button>
           <button
             type="button"
             onClick={() => setMethod(WithdrawalMethod.FAUCETPAY)}
-            className={`p-4 rounded-xl border text-xs font-bold font-mono uppercase tracking-wider transition-all duration-300 ${
+            className={`p-4 rounded-xl border text-[10px] font-bold font-mono uppercase tracking-widest transition-all duration-300 relative overflow-hidden ${
               method === WithdrawalMethod.FAUCETPAY
               ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
+            {method === WithdrawalMethod.FAUCETPAY && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent animate-shimmer skew-x-12"></div>}
             {t('method_faucetpay')}
           </button>
         </div>
 
         {/* Form Fields */}
-        <Card className="space-y-4">
+        <div className="space-y-4 bg-slate-900/50 p-4 rounded-xl border border-white/5">
           <div>
-            <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">
+            <label className="block text-[9px] font-tech text-cyan-400 mb-2 uppercase tracking-widest">
               {method === WithdrawalMethod.CWALLET ? t('label_cwallet') : t('label_faucetpay')}
             </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono placeholder-white/20"
-              placeholder={method === WithdrawalMethod.CWALLET ? "user@example.com" : "BTC Address..."}
-              required
-            />
+            <div className="relative">
+                <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
+                placeholder={method === WithdrawalMethod.CWALLET ? "user@example.com" : "BTC Address..."}
+                required
+                />
+            </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wide">{t('label_amount')}</label>
+            <label className="block text-[9px] font-tech text-cyan-400 mb-2 uppercase tracking-widest">{t('label_amount')}</label>
             <div className="relative group">
-              <span className="absolute left-3 top-3 text-white/40 group-focus-within:text-white transition-colors">$</span>
+              <span className="absolute left-3 top-3 text-white/30 group-focus-within:text-white transition-colors font-mono">$</span>
               <input
                 type="number"
                 step="0.0001"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 pl-7 text-base text-white focus:outline-none focus:border-white/50 focus:bg-white/5 transition-all font-mono"
+                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 pl-7 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
                 placeholder="0.0000"
                 required
               />
             </div>
-            <p className="text-[10px] text-white/30 mt-2 text-right font-mono">
-              {t('min_withdraw')}: ${MIN_WITHDRAWAL[method]}
-            </p>
+            <div className="flex justify-between mt-2">
+                <p className="text-[9px] text-white/30 font-mono">
+                FEE: <span className="text-white/50">0%</span>
+                </p>
+                <p className="text-[9px] text-white/30 font-mono">
+                {t('min_withdraw')}: <span className="text-white/70">${MIN_WITHDRAWAL[method]}</span>
+                </p>
+            </div>
           </div>
-        </Card>
+        </div>
 
-        <Button type="submit" isLoading={loading} className="mt-4">
+        <Button type="submit" isLoading={loading} className="mt-4 !bg-cyan-600 !border-cyan-500/50 hover:!shadow-[0_0_20px_rgba(6,182,212,0.4)]">
            {loading ? t('process_tx') : t('confirm_withdraw')}
         </Button>
       </form>
       
       {message && (
-        <div className={`p-4 rounded-xl text-xs font-mono border animate-fade-in-up ${
+        <div className={`p-4 rounded-xl text-xs font-mono border animate-pop-in ${
           message.type === 'success' 
             ? 'bg-green-500/10 border-green-500/20 text-green-400' 
             : 'bg-red-500/10 border-red-500/20 text-red-400'
@@ -137,7 +147,7 @@ const Wallet: React.FC = () => {
         </div>
       )}
 
-      <div className="flex justify-center items-center gap-2 text-[10px] text-white/30 uppercase tracking-widest font-mono">
+      <div className="flex justify-center items-center gap-2 text-[9px] text-white/20 uppercase tracking-[0.2em] font-tech pt-8">
         <IconLock className="w-3 h-3" />
         {t('secure_tx')}
       </div>

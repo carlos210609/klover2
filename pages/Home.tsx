@@ -4,16 +4,15 @@ import Button from '../components/Button';
 import { backendService } from '../services/mockBackend';
 import { User } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { IconZap, IconStar, IconRefresh, IconUser } from '../components/Icons';
+import { IconZap, IconStar, IconRefresh, IconUser, IconShop } from '../components/Icons';
 import { useLanguage } from '../App';
 
 const QUIPS = [
-  "System Needs Coffee ☕",
-  "Fueling Rockets 🚀",
-  "Don't Spend It All! 💸",
-  "Crypto Goes Brrr 📈",
-  "Loading Rich Life... 📶",
-  "Beep Boop I'm Rich 🤖"
+  "SYSTEM ONLINE //",
+  "PROTOCOL: WEALTH //",
+  "CRYPTO MINING... //",
+  "UPLINK SECURE //",
+  "LOADING ASSETS //",
 ];
 
 const Home: React.FC = () => {
@@ -34,7 +33,7 @@ const Home: React.FC = () => {
     setQuip(QUIPS[Math.floor(Math.random() * QUIPS.length)]);
   }, [navigate]);
 
-  if (!user) return <div className="flex h-full items-center justify-center pt-20"><div className="animate-spin-slow text-4xl opacity-50">❖</div></div>;
+  if (!user) return <div className="flex h-full items-center justify-center pt-20"><div className="animate-spin-slow text-4xl opacity-50 text-cyan-500">❖</div></div>;
 
   const referralLink = `https://t.me/KloverBot?start=${user.id}`;
 
@@ -47,123 +46,175 @@ const Home: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      {/* Sarcastic Mascot Bubble */}
-      <div className="flex justify-center -mb-2 animate-pop-in" style={{ animationDelay: '0.2s' }}>
-         <div className="bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 text-[10px] font-mono text-cyan-300 animate-wobble">
-            {quip}
-         </div>
-      </div>
-
-      {/* Header */}
-      <div className="flex justify-between items-center px-2 animate-roll-in-left">
-        <div className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-white/5 relative group-hover:scale-125 transition-transform duration-300 ring-2 ring-transparent group-hover:ring-cyan-400">
-             <div className="absolute inset-0 bg-white/10 animate-pulse-slow"></div>
-            <img src={user.photoUrl} alt="User" className="w-full h-full object-cover relative z-10" />
+      {/* Header Profile Chip */}
+      <div className="flex justify-between items-center animate-fade-in-up">
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full pl-1 pr-4 py-1 backdrop-blur-md">
+          <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden relative">
+            <img src={user.photoUrl} alt="User" className="w-full h-full object-cover" />
           </div>
-          <div>
-            <h1 className="text-xs text-white/60 font-mono group-hover:text-white transition-colors">{t('connected_as')}</h1>
-            <p className="font-bold text-white tracking-wide text-sm">{user.email.length > 20 ? user.email.substring(0,18)+'...' : user.email}</p>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-tech text-white/50 leading-none">ID-{user.id.toString().slice(0,6)}</span>
+            <span className="text-xs font-bold text-white leading-none tracking-wide">{user.email.split('@')[0]}</span>
           </div>
         </div>
+        
         <div 
           onClick={() => navigate('/profile')}
-          className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-mono text-green-400 shadow-[0_0_10px_rgba(74,222,128,0.1)] cursor-pointer hover:bg-green-400/20 hover:scale-110 transition-all active:scale-90"
+          className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
         >
-          {t('premium')}
+          <div className="w-4 h-0.5 bg-current rounded-full mb-0.5"></div>
+          <div className="w-4 h-0.5 bg-current rounded-full"></div>
         </div>
       </div>
 
-      {/* Main Balance Card - Zoom Bounce on Load */}
+      {/* Sarcastic Mascot Bubble */}
+      <div className="flex justify-start px-2 -mb-2 animate-pulse-slow">
+         <span className="text-[10px] font-tech text-cyan-400/80 tracking-widest uppercase flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></span>
+            {quip}
+         </span>
+      </div>
+
+      {/* Holographic Balance Card */}
       <div className="animate-zoom-bounce" style={{ animationDelay: '0.1s' }}>
-        <Card className="mt-8 transform transition-transform hover:rotate-1">
-            <div className="flex flex-col items-center justify-center py-6 relative">
-            <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full animate-pulse-slow"></div>
-            <span className="text-white/40 font-mono text-sm uppercase tracking-widest mb-2 relative z-10">{t('total_balance')}</span>
-            <h2 className="text-5xl font-mono font-bold text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.4)] relative z-10 hover:scale-110 transition-transform cursor-default">
-                ${user.balance.toFixed(4)}
-            </h2>
-            <div className="mt-6 w-full px-4 relative z-10">
-                <Button onClick={() => navigate('/earn')}>
-                <IconZap className="w-5 h-5 animate-pulse" /> {t('start_earning')}
-                </Button>
-            </div>
-            </div>
-        </Card>
+        <div className="relative w-full aspect-[1.8/1] rounded-2xl overflow-hidden group perspective-1000">
+           {/* Card Background */}
+           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-[#0B1121] to-black border border-white/10 rounded-2xl"></div>
+           
+           {/* Holographic Mesh */}
+           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-900 via-transparent to-transparent"></div>
+           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
+           
+           {/* Animated Shine */}
+           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer skew-x-12"></div>
+
+           {/* Content */}
+           <div className="relative h-full p-6 flex flex-col justify-between z-10">
+              <div className="flex justify-between items-start">
+                 <div className="flex flex-col">
+                    <span className="text-[10px] font-tech text-white/40 uppercase tracking-[0.2em] mb-1">{t('total_balance')}</span>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-mono font-bold text-white tracking-tighter drop-shadow-lg">${Math.floor(user.balance)}</span>
+                        <span className="text-2xl font-mono text-white/60">.{(user.balance % 1).toFixed(4).substring(2)}</span>
+                    </div>
+                 </div>
+                 <IconZap className="w-6 h-6 text-cyan-400 animate-pulse-slow" />
+              </div>
+
+              {/* Data Decoration */}
+              <div className="w-full h-px bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 my-2"></div>
+
+              <div className="flex justify-between items-end">
+                 <div className="flex gap-4">
+                    <div className="flex flex-col">
+                       <span className="text-[9px] text-white/30 font-mono">EARNINGS</span>
+                       <span className="text-xs text-green-400 font-mono">+0.5%</span>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-[9px] text-white/30 font-mono">STATUS</span>
+                       <span className="text-xs text-white font-mono">ACTIVE</span>
+                    </div>
+                 </div>
+                 <Button 
+                   onClick={() => navigate('/earn')} 
+                   className="!w-auto !py-2 !px-4 !text-xs !bg-cyan-500 !text-black !font-bold hover:!shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+                 >
+                   {t('start_earning')}
+                 </Button>
+              </div>
+           </div>
+        </div>
       </div>
 
       {/* Resources Grid - Rolling In */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Spins */}
         <div className="animate-roll-in-left" style={{ animationDelay: '0.2s' }}>
-            <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-2xl p-4 flex flex-col justify-between h-24 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-            <div className="absolute right-0 top-0 p-2 opacity-20 group-hover:opacity-100 group-hover:rotate-180 transition-all duration-500">
-                <IconRefresh className="w-10 h-10" />
-            </div>
-            <p className="text-blue-200 font-mono text-xs uppercase tracking-wider">{t('spins_avail')}</p>
-            <p className="text-2xl font-bold text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)] group-hover:scale-125 origin-left transition-transform">
-                {user.spins}
-            </p>
+            <div className="bg-[#0f172a]/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-between h-28 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+               <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <div className="flex justify-between items-start relative z-10">
+                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                     <IconRefresh className="w-5 h-5 group-hover:rotate-180 transition-transform duration-700" />
+                  </div>
+                  <span className="text-[10px] font-tech text-white/30">LUCK-SYS</span>
+               </div>
+               <div className="relative z-10">
+                  <p className="text-2xl font-bold text-white font-mono">{user.spins}</p>
+                  <p className="text-[10px] text-blue-300 uppercase tracking-wider">{t('spins_avail')}</p>
+               </div>
             </div>
         </div>
 
         {/* Points */}
         <div className="animate-roll-in-right" style={{ animationDelay: '0.3s' }}>
-            <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-2xl p-4 flex flex-col justify-between h-24 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-            <div className="absolute right-0 top-0 p-2 opacity-20 group-hover:opacity-100 group-hover:animate-wobble transition-all">
-                <IconStar className="w-10 h-10" />
-            </div>
-            <p className="text-purple-200 font-mono text-xs uppercase tracking-wider">{t('loyalty_pts')}</p>
-            <p className="text-2xl font-bold text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)] group-hover:scale-125 origin-left transition-transform">
-                {user.points}
-            </p>
+            <div className="bg-[#0f172a]/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-between h-28 relative overflow-hidden group hover:border-purple-500/30 transition-all">
+               <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <div className="flex justify-between items-start relative z-10">
+                  <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                     <IconStar className="w-5 h-5 group-hover:animate-wobble" />
+                  </div>
+                  <span className="text-[10px] font-tech text-white/30">LOYALTY</span>
+               </div>
+               <div className="relative z-10">
+                  <p className="text-2xl font-bold text-white font-mono">{user.points}</p>
+                  <p className="text-[10px] text-purple-300 uppercase tracking-wider">{t('loyalty_pts')}</p>
+               </div>
             </div>
         </div>
       </div>
 
-      {/* REFERRAL SYSTEM */}
-      <div className="pt-4 animate-zoom-bounce" style={{ animationDelay: '0.4s' }}>
-         <h3 className="text-white/40 font-mono text-xs uppercase mb-3 px-2 tracking-widest">{t('referral_prog')}</h3>
-         <Card className="bg-slate-900/50">
-             <div className="flex justify-between items-start mb-4">
-                <div>
-                   <p className="text-sm font-bold text-white flex items-center gap-2 group cursor-help">
-                     <IconUser className="w-4 h-4 text-purple-400 group-hover:rotate-12 transition-transform" />
-                     {t('invite_earn')}
-                   </p>
-                   <p className="text-[10px] text-white/50 mt-1">{t('total_comm')}: <span className="text-green-400 font-mono">${(user.referralEarnings || 0).toFixed(4)}</span></p>
+      {/* REFERRAL SYSTEM - Mission Card Style */}
+      <div className="pt-2 animate-zoom-bounce" style={{ animationDelay: '0.4s' }}>
+         <Card className="!bg-[#0f172a] !border-white/10 !p-0 overflow-hidden">
+             <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">{t('referral_prog')}</h3>
                 </div>
-                <div className="text-right">
-                   <div className="text-[10px] text-white/30 uppercase font-mono">{t('your_link')}</div>
-                </div>
+                <span className="text-[10px] font-mono text-green-400 border border-green-500/20 bg-green-500/10 px-2 py-0.5 rounded">
+                   +30% COMM
+                </span>
              </div>
              
-             <div className="flex gap-2">
-                <div className="flex-1 bg-black/40 border border-white/5 rounded-lg p-2 text-xs font-mono text-white/60 truncate hover:text-white transition-colors select-all">
-                  {referralLink}
+             <div className="p-4 space-y-4">
+                <div className="flex justify-between text-xs font-mono">
+                   <span className="text-white/40">{t('total_comm')}</span>
+                   <span className="text-white">${(user.referralEarnings || 0).toFixed(4)}</span>
                 </div>
-                <button 
-                  onClick={copyRef}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-bold font-mono transition-all transform active:scale-90 ${copied ? 'bg-green-500 text-black rotate-3 scale-110' : 'bg-white/10 hover:bg-white/20 text-white'}`}
-                >
-                  {copied ? t('copied') : t('copy')}
-                </button>
+                
+                <div className="flex gap-2">
+                    <div className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white/70 truncate flex items-center">
+                      <span className="opacity-50 mr-2 select-none">$</span> {referralLink}
+                    </div>
+                    <button 
+                      onClick={copyRef}
+                      className={`px-4 rounded-lg text-xs font-bold font-mono transition-all uppercase ${copied ? 'bg-green-500 text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    >
+                      {copied ? '✓' : t('copy')}
+                    </button>
+                </div>
              </div>
          </Card>
       </div>
 
       {/* Recent Activity Mini */}
-      <div className="pt-4 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-        <h3 className="text-white/40 font-mono text-xs uppercase mb-3 px-2 tracking-widest">{t('quick_actions')}</h3>
+      <div className="pt-2 pb-6 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
         <div 
           onClick={() => navigate('/shop')}
-          className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm cursor-pointer hover:bg-white/10 transition-all hover:scale-[1.02] group"
+          className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-white/5 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm cursor-pointer hover:border-white/20 transition-all group"
         >
-           <span className="text-xs text-white/80 flex items-center gap-2 group-hover:translate-x-2 transition-transform">
-             <div className="w-2 h-2 rounded-full bg-purple-500 animate-ping"></div>
-             {t('shop_link')}
-           </span>
-           <span className="text-xs font-mono text-white/40 group-hover:-translate-x-2 transition-transform">{t('open')} &rarr;</span>
+           <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                 <IconShop className="w-4 h-4 text-white/70" />
+              </div>
+              <div className="flex flex-col">
+                 <span className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors">{t('black_market')}</span>
+                 <span className="text-[10px] text-white/40">{t('shop_link')}</span>
+              </div>
+           </div>
+           <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+              <span className="text-[10px] text-white/50">&rarr;</span>
+           </div>
         </div>
       </div>
     </div>
