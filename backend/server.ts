@@ -6,7 +6,6 @@
 
 import express from 'express';
 import cors from 'cors';
-import crypto from 'crypto';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
@@ -64,19 +63,21 @@ const saveDb = (data: Database) => {
 };
 
 // --- HELPER: FaucetPay API Call ---
-const sendFaucetPayPayout = async (to: string, amountBRL: number) => {
+const sendFaucetPayPayout = async (to: string, amountUSD: number) => {
   if (FAUCETPAY_API_KEY === "YOUR_FAUCETPAY_API_KEY_HERE") {
     console.warn("MOCKING FAUCETPAY: API Key not set.");
-    return { status: 200, message: "Mock payout successful" };
+    return { status: 200, message: "Mock payout successful", txid: "mock_tx_" + Date.now() };
   }
-
-  // Conversão BRL -> USD Simples (Exemplo: 1 BRL = 0.20 USD)
-  const amountUSD = amountBRL * 0.20; 
 
   try {
     const params = new URLSearchParams();
     params.append('api_key', FAUCETPAY_API_KEY);
-    params.append('amount', (amountUSD * 100000000).toFixed(0)); // Satoshis (Exemplo para BTC/USDT em ints)
+    // FaucetPay API expects satoshis for BTC, but for USDT it usually expects 8 decimal places int or similar.
+    // Documentation varies, but generally sends amount. 
+    // Assuming FaucetPay 'send' endpoint accepts 'amount' as standard unit or we adjust based on currency.
+    // For USDT, usually 1 = 1 USDT. If satoshis needed, multiply by 10^8.
+    // Let's assume 10^8 multiplier for safety or standard satoshi usage.
+    params.append('amount', (amountUSD * 100000000).toFixed(0)); 
     params.append('to', to);
     params.append('currency', FAUCETPAY_CURRENCY);
     
@@ -171,7 +172,7 @@ app.post('/api/auth/email', (req, res) => {
       id: newId,
       username: email.split('@')[0],
       email: email,
-      firstName: 'Miner',
+      firstName: 'Klover User',
       photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`,
       balance: 0.00,
       spins: 1,
@@ -209,7 +210,7 @@ app.post('/api/action/referral', (req, res) => {
     const db = loadDb();
 
     if (db.users[referrerId]) {
-        if (currency === 'BRL') {
+        if (currency === 'USD') {
             db.users[referrerId].balance += amount;
         } else {
             db.users[referrerId].points += amount;
@@ -252,11 +253,12 @@ app.post('/api/withdraw', async (req, res) => {
     user.balance -= amount;
     
     let txDetails = "";
+    let apiResult = { txid: "MANUAL" };
     
     if (method === 'FAUCETPAY') {
        // CALL REAL FAUCETPAY API
-       const result: any = await sendFaucetPayPayout(address, amount);
-       txDetails = `FP_ID: ${result.txid || 'MOCKED'}`;
+       apiResult = await sendFaucetPayPayout(address, amount) as any;
+       txDetails = `FP_ID: ${apiResult.txid}`;
     } else {
        // CWallet implementation placeholder
        txDetails = "Manual/Cwallet Processing";
@@ -268,7 +270,7 @@ app.post('/api/withdraw', async (req, res) => {
       userId: user.id,
       type: 'WITHDRAWAL',
       amount: amount,
-      currency: 'BRL',
+      currency: 'USD',
       method: method,
       status: 'COMPLETED', // Or PENDING if manual
       timestamp: Date.now(),

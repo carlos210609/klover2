@@ -1,11 +1,10 @@
 
-
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { backendService } from '../services/mockBackend';
 import { User } from '../types';
-import { ROULETTE_PRIZES } from '../constants';
+import { ROULETTE_PRIZES, AD_ZONE_ID } from '../constants';
 import { useLanguage } from '../App';
 
 const Earn: React.FC = () => {
@@ -20,14 +19,12 @@ const Earn: React.FC = () => {
 
   useEffect(() => {
     refreshUser();
-    // Dynamic Ad Script
-    const existingScript = document.getElementById('libtl-sdk');
-    if (!existingScript) {
+    // Dynamic Ad Script - Adsgram
+    const scriptId = 'adsgram-sdk';
+    if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
-      script.id = 'libtl-sdk';
-      script.src = '//libtl.com/sdk.js';
-      script.dataset.zone = '10283220';
-      script.dataset.sdk = 'show_10283220';
+      script.id = scriptId;
+      script.src = `https://adsgram.ai/js/adsgram.js?blockId=${AD_ZONE_ID}`;
       script.async = true;
       document.body.appendChild(script);
     }
@@ -43,18 +40,29 @@ const Earn: React.FC = () => {
     setWinMessage(null);
 
     try {
-      if (typeof window.show_10283220 === 'function') {
-        await window.show_10283220();
+      if (window.Adsgram) {
+        const AdController = window.Adsgram.init({ blockId: AD_ZONE_ID });
+        const result = await AdController.show();
+        
+        if (result.done) {
+          const rewardRes = await backendService.creditReward();
+          if (rewardRes.success) {
+            refreshUser();
+          }
+        } else {
+            // Optional: Handle skipped/error
+            setError("Ad was not completed.");
+        }
       } else {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-
-      const result = await backendService.creditReward();
-      if (result.success) {
+        // Fallback or dev mode
+        console.warn("Adsgram SDK not loaded yet or blocked.");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await backendService.creditReward(); // Dev fallback
         refreshUser();
       }
     } catch (err: any) {
-      setError(err.message || "Failed to load ad");
+      console.error(err);
+      setError(err?.description || "Failed to load ad");
     } finally {
       setLoading(false);
     }
@@ -122,7 +130,7 @@ const Earn: React.FC = () => {
       <div className="relative h-72 w-full flex items-center justify-center perspective-1000 overflow-visible my-6">
          
          {/* Background Pulse */}
-         <div className={`absolute w-64 h-64 rounded-full bg-blue-500/10 blur-[60px] transition-all duration-300 ${isSpinning ? 'scale-125 bg-purple-500/20' : 'scale-100'}`}></div>
+         <div className={`absolute w-64 h-64 rounded-full bg-neon-blue/10 blur-[60px] transition-all duration-300 ${isSpinning ? 'scale-125 bg-neon-purple/20' : 'scale-100'}`}></div>
 
          {/* Outer Ring */}
          <div className="absolute w-64 h-64 rounded-full border border-white/5 animate-spin-slow opacity-30 border-dashed"></div>
@@ -142,7 +150,7 @@ const Earn: React.FC = () => {
 
          {/* Center Reactor Core (Overlay) */}
          <div className="absolute w-16 h-16 rounded-full bg-slate-900 border border-white/20 z-10 flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-            <div className={`w-8 h-8 rounded-full bg-blue-400/20 blur-md ${isSpinning ? 'animate-pulse' : ''}`}></div>
+            <div className={`w-8 h-8 rounded-full bg-neon-blue/20 blur-md ${isSpinning ? 'animate-pulse' : ''}`}></div>
             <div className="absolute w-12 h-12 rounded-full border border-white/10 animate-spin"></div>
          </div>
 
@@ -153,7 +161,7 @@ const Earn: React.FC = () => {
          {winMessage && !isSpinning && (
            <div className="absolute inset-0 flex items-center justify-center z-50 animate-victory-pop">
               <div className="bg-black/90 backdrop-blur-xl border border-white/20 p-6 rounded-2xl text-center shadow-[0_0_50px_rgba(255,255,255,0.1)] transform scale-110">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur opacity-30"></div>
+                 <div className="absolute -inset-1 bg-gradient-to-r from-neon-blue to-neon-purple rounded-2xl blur opacity-30"></div>
                  <div className="relative">
                     <p className="text-[10px] text-white/60 font-mono uppercase tracking-widest mb-1">{t('result')}</p>
                     <p className={`text-3xl font-bold ${winMessage.type === 'CASH' ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]'}`}>
@@ -176,7 +184,7 @@ const Earn: React.FC = () => {
            <Button 
               onClick={handleSpinWheel}
               disabled={user.spins === 0 || isSpinning}
-              className={`h-16 text-xl border-blue-500/30 font-bold tracking-widest ${user.spins > 0 ? 'bg-gradient-to-r from-blue-900/40 to-purple-900/40 text-blue-100 hover:border-blue-400/50' : 'opacity-50 grayscale'}`}
+              className={`h-16 text-xl border-neon-blue/30 font-bold tracking-widest ${user.spins > 0 ? 'bg-gradient-to-r from-blue-900/40 to-purple-900/40 text-blue-100 hover:border-neon-blue/50' : 'opacity-50 grayscale'}`}
            >
               {isSpinning ? t('stabilizing') : `${t('activate')} (${user.spins})`}
            </Button>

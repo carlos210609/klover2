@@ -1,5 +1,4 @@
 
-
 export interface User {
   id: string | number;
   username: string;
@@ -41,7 +40,7 @@ export interface Transaction {
   id: string;
   type: TransactionType;
   amount: number; // Amount or Points
-  currency?: 'USD' | 'PTS' | 'BRL';
+  currency?: 'USD' | 'PTS';
   method?: WithdrawalMethod;
   status: TransactionStatus;
   timestamp: number;
@@ -55,7 +54,7 @@ export interface ShopItem {
   name: string;
   description: string;
   price: number;
-  currency: 'USD' | 'PTS' | 'BRL';
+  currency: 'USD' | 'PTS';
   icon: string;
   rarity: ItemRarity;
 }
@@ -84,11 +83,24 @@ export interface TelegramWebApp {
   platform: string;
 }
 
+export interface AdsgramShowResult {
+  done: boolean;
+  description: string;
+  state: 'load' | 'render' | 'playing' | 'destroy';
+  error: boolean;
+}
+
+export interface AdsgramController {
+  show: () => Promise<AdsgramShowResult>;
+}
+
 declare global {
   interface Window {
     Telegram: {
       WebApp: TelegramWebApp;
     };
-    show_10283220: () => Promise<void>;
+    Adsgram?: {
+      init: (config: { blockId: string; debug?: boolean }) => AdsgramController;
+    };
   }
 }

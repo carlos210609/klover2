@@ -1,5 +1,4 @@
 
-
 import { User, Transaction, TransactionType, TransactionStatus, WithdrawalMethod, ShopItem } from '../types';
 import { ROULETTE_PRIZES, REFERRAL_RATE } from '../constants';
 
@@ -58,7 +57,7 @@ export const backendService = {
           id: Math.floor(Math.random() * 1000000).toString(),
           username: email.split('@')[0],
           email: email,
-          firstName: "Miner",
+          firstName: "Klover User",
           photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`, 
           balance: 0.00,
           spins: 1, 
@@ -170,14 +169,13 @@ export const backendService = {
         console.log(`Crediting Referrer ${currentUser.referredBy}: ${commissionAmount} (${selectedPrize.type})`);
         
         // In a real app, we would POST to backend here to update the referrer's balance.
-        // For this mock, we pretend it works.
         fetch(`${API_BASE}/action/referral`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
                 referrerId: currentUser.referredBy, 
                 amount: commissionAmount, 
-                currency: selectedPrize.type === 'CASH' ? 'BRL' : 'PTS' 
+                currency: selectedPrize.type === 'CASH' ? 'USD' : 'PTS' 
             })
         }).catch(() => {});
     }
@@ -187,7 +185,7 @@ export const backendService = {
       id: `spin_${Date.now()}`,
       type: TransactionType.EARN,
       amount: selectedPrize.value,
-      currency: selectedPrize.type === 'CASH' ? 'BRL' : 'PTS',
+      currency: selectedPrize.type === 'CASH' ? 'USD' : 'PTS',
       status: TransactionStatus.COMPLETED,
       timestamp: Date.now(),
       details: "Lucky Spin Reward"
@@ -223,8 +221,8 @@ export const backendService = {
     let message = `Purchased ${item.name}`;
     switch (item.id) {
         case 'cash_conversion_1':
-            currentUser.balance += 0.10; // R$ 0.10
-            currentUser.totalEarnings += 0.10;
+            currentUser.balance += 0.01; // $0.01
+            currentUser.totalEarnings += 0.01;
             break;
         case 'buy_spin_5':
             currentUser.spins += 5;
@@ -234,9 +232,9 @@ export const backendService = {
             message = "Legendary! +25 Spins added.";
             break;
         case 'nano_miner':
-            currentUser.balance += 0.50; // R$ 0.50
-            currentUser.totalEarnings += 0.50;
-            message = "Miner yielded R$0.50 instantly.";
+            currentUser.balance += 0.05; // $0.05
+            currentUser.totalEarnings += 0.05;
+            message = "Miner yielded $0.05 instantly.";
             break;
         default:
             break;

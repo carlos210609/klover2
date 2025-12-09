@@ -29,7 +29,7 @@ const Wallet: React.FC = () => {
     const numAmount = parseFloat(amount);
 
     if (isNaN(numAmount) || numAmount < MIN_WITHDRAWAL[method]) {
-        setMessage({type: 'error', text: `${t('error_min')} R$${MIN_WITHDRAWAL[method]}`});
+        setMessage({type: 'error', text: `${t('error_min')} $${MIN_WITHDRAWAL[method]}`});
         setLoading(false);
         return;
     }
@@ -50,14 +50,14 @@ const Wallet: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="px-2">
-        <h2 className="text-xl font-bold font-mono text-white tracking-tight uppercase border-l-4 border-cyan-500 pl-3">{t('withdraw_funds')}</h2>
+        <h2 className="text-xl font-bold font-mono text-white tracking-tight uppercase border-l-4 border-neon-blue pl-3 drop-shadow-[0_0_8px_rgba(0,168,255,0.6)]">{t('withdraw_funds')}</h2>
       </div>
 
-      <div className="relative p-6 rounded-2xl bg-[#0f172a] border border-white/10 overflow-hidden group">
-         <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
+      <div className="relative p-6 rounded-2xl bg-[#0f172a] border border-white/10 overflow-hidden group hover:border-neon-blue/40 transition-colors">
+         <div className="absolute top-0 right-0 w-48 h-48 bg-neon-blue/10 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 group-hover:bg-neon-blue/20 transition-colors duration-700"></div>
          <p className="text-[10px] text-white/50 font-tech mb-2 uppercase tracking-widest">{t('avail_bal')}</p>
          <div className="flex items-baseline gap-1">
-             <p className="text-4xl font-mono font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">R${balance.toFixed(2)}</p>
+             <p className="text-4xl font-mono font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">${balance.toFixed(4)}</p>
          </div>
       </div>
 
@@ -69,7 +69,7 @@ const Wallet: React.FC = () => {
             onClick={() => setMethod(WithdrawalMethod.CWALLET)}
             className={`p-4 rounded-xl border text-[10px] font-bold font-mono uppercase tracking-widest transition-all duration-300 relative overflow-hidden ${
               method === WithdrawalMethod.CWALLET 
-              ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+              ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-[1.02]' 
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
@@ -81,7 +81,7 @@ const Wallet: React.FC = () => {
             onClick={() => setMethod(WithdrawalMethod.FAUCETPAY)}
             className={`p-4 rounded-xl border text-[10px] font-bold font-mono uppercase tracking-widest transition-all duration-300 relative overflow-hidden ${
               method === WithdrawalMethod.FAUCETPAY
-              ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+              ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-[1.02]' 
               : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/80'
             }`}
           >
@@ -91,9 +91,9 @@ const Wallet: React.FC = () => {
         </div>
 
         {/* Form Fields */}
-        <div className="space-y-4 bg-slate-900/50 p-4 rounded-xl border border-white/5">
+        <div className="space-y-4 bg-slate-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
           <div>
-            <label className="block text-[9px] font-tech text-cyan-400 mb-2 uppercase tracking-widest">
+            <label className="block text-[9px] font-tech text-neon-blue mb-2 uppercase tracking-widest">
               {method === WithdrawalMethod.CWALLET ? t('label_cwallet') : t('label_faucetpay')}
             </label>
             <div className="relative">
@@ -101,7 +101,7 @@ const Wallet: React.FC = () => {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
+                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-neon-blue/50 focus:bg-neon-blue/5 focus:shadow-[0_0_15px_rgba(0,168,255,0.1)] transition-all font-mono placeholder-white/10"
                 placeholder={method === WithdrawalMethod.CWALLET ? "user@example.com" : "BTC Address..."}
                 required
                 />
@@ -109,16 +109,16 @@ const Wallet: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-[9px] font-tech text-cyan-400 mb-2 uppercase tracking-widest">{t('label_amount')}</label>
+            <label className="block text-[9px] font-tech text-neon-blue mb-2 uppercase tracking-widest">{t('label_amount')}</label>
             <div className="relative group">
-              <span className="absolute left-3 top-3 text-white/30 group-focus-within:text-white transition-colors font-mono">R$</span>
+              <span className="absolute left-3 top-3 text-white/30 group-focus-within:text-white transition-colors font-mono">$</span>
               <input
                 type="number"
-                step="0.01"
+                step="0.0001"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 pl-10 text-base text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
-                placeholder="0.00"
+                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 pl-8 text-base text-white focus:outline-none focus:border-neon-blue/50 focus:bg-neon-blue/5 focus:shadow-[0_0_15px_rgba(0,168,255,0.1)] transition-all font-mono placeholder-white/10"
+                placeholder="0.0000"
                 required
               />
             </div>
@@ -127,13 +127,13 @@ const Wallet: React.FC = () => {
                 FEE: <span className="text-white/50">0%</span>
                 </p>
                 <p className="text-[9px] text-white/30 font-mono">
-                {t('min_withdraw')}: <span className="text-white/70">R${MIN_WITHDRAWAL[method]}</span>
+                {t('min_withdraw')}: <span className="text-white/70">${MIN_WITHDRAWAL[method]}</span>
                 </p>
             </div>
           </div>
         </div>
 
-        <Button type="submit" isLoading={loading} className="mt-4 !bg-cyan-600 !border-cyan-500/50 hover:!shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+        <Button type="submit" isLoading={loading} className="mt-4 !bg-neon-blue !border-neon-blue/50 hover:!shadow-[0_0_20px_rgba(0,168,255,0.4)]">
            {loading ? t('process_tx') : t('confirm_withdraw')}
         </Button>
       </form>
