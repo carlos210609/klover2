@@ -1,86 +1,68 @@
-
 import React from 'react';
 
-interface SvgIconProps {
-  className?: string;
-  children?: React.ReactNode;
-}
+const iconProps = {
+  className: "w-6 h-6",
+  strokeWidth: 1.5,
+};
 
-const SvgIcon = ({ className = "w-6 h-6 text-k-text-primary", children }: SvgIconProps) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    {children}
+export const IconHome = () => (
+  <svg {...iconProps} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
   </svg>
 );
 
-export const IconHome = ({ className }: { className?: string }) => (
-  <SvgIcon className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </SvgIcon>
-);
-
-export const IconKlover = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2c0 5.523-4.477 10-10 10" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M22 12c-5.523 0-10-4.477-10-10" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 22c0-5.523 4.477-10 10-10" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2 12c5.523 0 10 4.477 10 10" />
-    </SvgIcon>
-);
-
-export const IconMissions = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </SvgIcon>
-);
-
-export const IconWallet = ({ className }: { className?: string }) => (
-  <SvgIcon className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-  </SvgIcon>
-);
-
-export const IconRanking = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-    </SvgIcon>
-);
-
-export const IconProfile = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </SvgIcon>
-);
-
-
-export const IconChest = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </SvgIcon>
-);
-
-export const IconPix = ({ className }: { className?: string }) => (
-  <SvgIcon className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.529 2.928a2.653 2.653 0 013.318 0l2.583 2.09a2.153 2.153 0 002.222 0l2.678-1.546a2.653 2.653 0 013.318 4.095l-1.546 2.678a2.153 2.153 0 000 2.222l2.09 2.583a2.653 2.653 0 01-4.095 3.318l-2.678-1.546a2.153 2.153 0 00-2.222 0l-2.583 2.09a2.653 2.653 0 01-3.318-4.095l1.546-2.678a2.153 2.153 0 000-2.222L3.339 9.39a2.653 2.653 0 014.095-3.318l2.095 2.583a2.153 2.153 0 002.222 0l1.778-1.027z" />
-  </SvgIcon>
-);
-
-export const IconChevronRight = ({ className }: { className?: string }) => (
-    <SvgIcon className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-    </SvgIcon>
-);
-
-export const IconCheck = ({ className }: { className?: string }) => (
-  <SvgIcon className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-  </SvgIcon>
-);
-
-export const IconLoader = ({ className }: { className?: string }) => (
-  <svg className={`animate-spin ${className || 'w-6 h-6 text-k-accent'}`} fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+export const IconWallet = () => (
+  <svg {...iconProps} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h7" />
+    <path d="M16 12h5" />
+    <path d="M18 10l3 2-3 2" />
+    <path d="M3 10h4" />
+    <path d="M5 8l-2 2 2 2" />
   </svg>
+);
+
+export const IconMissions = () => (
+  <svg {...iconProps} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+    <path d="M12 18L12 12" />
+    <path d="M12 8L12.01 8" />
+  </svg>
+);
+
+export const IconRanking = () => (
+    <svg {...iconProps} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M6 9l6 6 6-6"/>
+        <path d="M6 15l6-6 6 6"/>
+    </svg>
+);
+
+
+export const IconKlover = () => (
+    <svg {...iconProps} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a10 10 0 0 0-7.5 16.5A10 10 0 0 0 12 22a10 10 0 0 0 7.5-3.5A10 10 0 0 0 12 2z"/>
+        <path d="M12 2v20"/>
+        <path d="M2 12h20"/>
+    </svg>
+);
+
+export const IconUser = () => (
+  <svg {...iconProps} className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+export const IconLogout = () => (
+  <svg {...iconProps} className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
+export const IconChevronRight = () => (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+    </svg>
 );
