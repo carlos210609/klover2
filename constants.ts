@@ -46,6 +46,7 @@ export const API_URL = "https://api.klover.app/v1";
 
 export const ROUTES = {
   HOME: "/",
+  KLOVER: "/klover",
   MISSIONS: "/missions",
   WALLET: "/wallet",
   RANKING: "/ranking",
@@ -62,6 +63,7 @@ export const MIN_WITHDRAWAL = {
 export const TRANSLATIONS = {
   en: {
     nav_home: "Home",
+    nav_klover: "Klover",
     nav_missions: "Missions",
     nav_wallet: "Wallet",
     nav_ranking: "Ranking",
@@ -70,6 +72,7 @@ export const TRANSLATIONS = {
   },
   pt: {
     nav_home: "Início",
+    nav_klover: "Klover",
     nav_missions: "Missões",
     nav_wallet: "Carteira",
     nav_ranking: "Ranking",
@@ -105,6 +108,11 @@ export const TRANSLATIONS = {
     user_id: "ID de Usuário",
     disconnect: "Desconectar",
     
+    // Klover
+    klover_omega_protocol: "KLOVER OMEGA PROTOCOL",
+    klover_description: "A próxima evolução da recompensa digital. Ative o protocolo para desbloquear potencial ilimitado, multiplicadores de ganhos e acesso a recompensas de nível Divino.",
+    protocol_offline: "PROTOCOLO OFFLINE",
+
     // General
     status: "Status",
     error: "Erro",

@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { IconHome, IconMissions, IconWallet, IconRanking, IconProfile } from './Icons';
+import { IconHome, IconMissions, IconWallet, IconRanking, IconProfile, IconKlover } from './Icons';
 import { useLanguage } from '../App';
 
 interface LayoutProps {
@@ -38,9 +38,10 @@ const Layout = ({ children }: LayoutProps) => {
           <nav className="relative w-full max-w-md bg-k-surface/50 backdrop-blur-xl border border-k-border rounded-xl flex justify-around items-center h-16 shadow-2xl shadow-black/50">
             <NavItem to="/" icon={<IconHome className="w-6 h-6" />} label={t('nav_home')} />
             <NavItem to="/missions" icon={<IconMissions className="w-6 h-6" />} label={t('nav_missions')} />
+            <NavItem to="/klover" icon={<IconKlover className="w-6 h-6" />} label={t('nav_klover')} />
             <NavItem to="/wallet" icon={<IconWallet className="w-6 h-6" />} label={t('nav_wallet')} />
             <NavItem to="/ranking" icon={<IconRanking className="w-6 h-6" />} label={t('nav_ranking')} />
-            <NavItem to="/profile" icon={<IconProfile className="w-6 h-6" />} label={t('nav_profile')} />
+            {/* <NavItem to="/profile" icon={<IconProfile className="w-6 h-6" />} label={t('nav_profile')} /> */}
           </nav>
         </div>
       )}

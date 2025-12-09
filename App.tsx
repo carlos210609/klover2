@@ -4,7 +4,7 @@ import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-d
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Wallet from './pages/Wallet';
-import History from './pages/History';
+import Klover from './pages/Klover';
 import Login from './pages/Login';
 import Missions from './pages/Missions';
 import Ranking from './pages/Ranking';
@@ -46,54 +46,8 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return backendService.isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// --- PROFILE PAGE ---
-const Profile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const { t } = useLanguage();
-  
-  useEffect(() => {
-    backendService.getUser().then(setUser);
-  }, []);
-
-  if (!user) return null;
-
-  return (
-    <div className="space-y-6">
-       <h1 className="text-2xl font-bold font-display text-k-text-primary">{t('profile_settings')}</h1>
-      
-      <div className="bg-k-surface border border-k-border rounded-xl p-6 text-center">
-        <img src={user.photoUrl} alt="Avatar" className="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-k-accent shadow-[0_0_15px_var(--k-accent-glow)]" />
-        <p className="text-lg font-bold text-k-text-primary mb-1">
-           {user.firstName}
-        </p>
-        <p className="text-sm text-k-text-secondary mb-4">@{user.username}</p>
-        
-        <div className="text-xs text-k-text-tertiary font-mono bg-k-bg p-2 rounded-md border border-k-border">
-            {t('user_id')}: {user.id}
-        </div>
-      </div>
-
-       <div className="grid grid-cols-2 gap-4">
-           <div className="bg-k-surface p-4 rounded-xl border border-k-border text-center">
-             <p className="text-xs text-k-text-secondary">{t('level')}</p>
-             <p className="font-display text-2xl font-bold text-k-accent">{user.level}</p>
-           </div>
-           <div className="bg-k-surface p-4 rounded-xl border border-k-border text-center">
-             <p className="text-xs text-k-text-secondary">{t('status')}</p>
-             <p className="font-display text-2xl font-bold text-k-green">{user.status}</p>
-           </div>
-        </div>
-
-      <button className="w-full text-center py-4 text-sm text-red-400 bg-red-500/10 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors" onClick={() => {
-        backendService.logout();
-        window.location.hash = '/login';
-        window.location.reload();
-      }}>
-        {t('disconnect')}
-      </button>
-    </div>
-  );
-};
+// --- PROFILE PAGE (MOVED INTO HOME HEADER) ---
+// The profile is now more integrated into the Home page header, so a separate page is not needed.
 
 // --- MAIN APP CONTENT ---
 const AppContent = () => {
@@ -147,9 +101,10 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
       <Route path="/missions" element={<RequireAuth><Missions /></RequireAuth>} />
+      <Route path="/klover" element={<RequireAuth><Klover /></RequireAuth>} />
       <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
       <Route path="/ranking" element={<RequireAuth><Ranking /></RequireAuth>} />
-      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+      {/* <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} /> */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

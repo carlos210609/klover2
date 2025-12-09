@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import { backendService } from '../services/mockBackend';
 import { User, Chest, Mission } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { IconChevronRight } from '../components/Icons';
+import { IconChevronRight, IconChest, IconProfile } from '../components/Icons';
 import { useLanguage } from '../App';
 import { LEVELS, REWARDED_AD_BLOCK_ID, TELEGA_TOKEN, CHEST_DEFINITIONS } from '../constants';
 
@@ -13,11 +13,61 @@ const adsController = window.TelegaIn?.AdsController.create_miniapp({
     token: TELEGA_TOKEN
 });
 
+// Chest Opening Animation Component
+const ChestOpeningOverlay = ({ chest, reward, onClose }: { chest: Chest; reward: { amount: number; currency: string } | null; onClose: () => void; }) => {
+    const chestInfo = CHEST_DEFINITIONS[chest.rarity];
+    const isRevealed = reward !== null;
+
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center animate-fade-in p-4">
+            <div className="w-full max-w-sm text-center">
+                {/* Reward View */}
+                {isRevealed && reward && (
+                    <div className="animate-reward-reveal space-y-6">
+                        <p className="text-xl text-k-text-secondary">Você recebeu:</p>
+                        <p className="text-5xl font-bold font-display text-k-green">
+                            + {reward.currency === 'BRL' ? 'R$ ' : ''}{reward.amount.toFixed(2)}
+                        </p>
+                        <Button onClick={onClose} className="!w-auto px-10 mx-auto">CONTINUAR</Button>
+                    </div>
+                )}
+
+                {/* Chest View */}
+                {!isRevealed && (
+                    <div className="space-y-4">
+                        <div className="relative animate-shake">
+                            <div 
+                                className="absolute -inset-8 blur-3xl rounded-full" 
+                                style={{ 
+                                    background: chestInfo.color.includes('gradient') 
+                                        ? chestInfo.color 
+                                        : chestInfo.color,
+                                    opacity: 0.4
+                                }}
+                            ></div>
+                            <IconChest className="w-40 h-40 mx-auto text-k-text-primary drop-shadow-2xl" />
+                        </div>
+                        <h3 className="text-2xl font-bold font-display animate-pop-in" style={{ color: chestInfo.color }}>
+                            {chestInfo.name}
+                        </h3>
+                        <p className="text-k-text-tertiary animate-fade-in-up">Abrindo...</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [adLoading, setAdLoading] = useState(false);
   const [lastChest, setLastChest] = useState<Chest | null>(null);
+  const [isOpeningChest, setIsOpeningChest] = useState(false);
+  const [openedReward, setOpenedReward] = useState<{ amount: number; currency: string } | null>(null);
+  const [chestToOpen, setChestToOpen] = useState<Chest | null>(null);
+
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -26,6 +76,10 @@ const Home: React.FC = () => {
       try {
         const userData = await backendService.getUser();
         setUser(userData);
+        // Check for unopened chests from last session
+        if(userData.chests.length > 0) {
+            setLastChest(userData.chests[0]);
+        }
         const missionData = await backendService.getMissions();
         setMissions(missionData.filter(m => m.type === 'DAILY'));
       } catch {
@@ -38,7 +92,6 @@ const Home: React.FC = () => {
   const handleWatchAd = async () => {
     if (!adsController) {
         console.error("Telega Ads SDK not initialized.");
-        // Fallback for development
         alert("Development Mode: Simulating ad watch.");
         const reward = await backendService.creditAdReward();
         setLastChest(reward.chest);
@@ -48,11 +101,7 @@ const Home: React.FC = () => {
 
     setAdLoading(true);
     try {
-      // Per documentation, this is how you show an ad. 
-      // We assume it resolves on completion.
       await adsController.ad_show({ adBlockUuid: REWARDED_AD_BLOCK_ID });
-      
-      // If the promise resolves without error, credit the reward
       const reward = await backendService.creditAdReward();
       setLastChest(reward.chest);
       setUser(await backendService.getUser());
@@ -64,14 +113,29 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleOpenChest = () => {
-    // Later, this could open a full-screen chest opening animation
-    if(lastChest) {
-        backendService.openChest(lastChest.id).then(async () => {
+  const handleOpenChestClick = (chest: Chest) => {
+    setChestToOpen(chest);
+    setIsOpeningChest(true);
+    
+    setTimeout(async () => {
+        try {
+            const result = await backendService.openChest(chest.id);
+            setOpenedReward({ amount: result.rewardAmount, currency: result.rewardCurrency });
             setLastChest(null);
-            setUser(await backendService.getUser());
-        });
-    }
+            const updatedUser = await backendService.getUser();
+            setUser(updatedUser);
+        } catch (error) {
+            console.error("Failed to open chest:", error);
+            setIsOpeningChest(false);
+            setChestToOpen(null);
+        }
+    }, 1800);
+  };
+
+  const handleAnimationClose = () => {
+    setIsOpeningChest(false);
+    setOpenedReward(null);
+    setChestToOpen(null);
   };
 
   if (!user) return <div className="flex h-full items-center justify-center pt-20"><div className="w-8 h-8 border-2 border-k-border border-t-k-accent rounded-full animate-spin"></div></div>;
@@ -83,6 +147,10 @@ const Home: React.FC = () => {
   return (
     <div className="space-y-6">
       
+      {isOpeningChest && chestToOpen && (
+        <ChestOpeningOverlay chest={chestToOpen} reward={openedReward} onClose={handleAnimationClose} />
+      )}
+
       {/* Header */}
       <header className="flex justify-between items-center">
         <div className="flex items-center gap-3">
@@ -92,11 +160,20 @@ const Home: React.FC = () => {
             <p className="text-xs text-k-text-tertiary font-mono">@{user.username}</p>
           </div>
         </div>
-        <div className="text-right">
-             <p className="text-xs text-k-text-secondary">{t('total_balance')}</p>
-             <p className="text-xl font-bold font-display text-k-text-primary">
-                R$ {user.balance.toFixed(2)}
-             </p>
+        <div className="flex items-center gap-4">
+            <div className="text-right">
+                <p className="text-xs text-k-text-secondary">{t('total_balance')}</p>
+                <p className="text-xl font-bold font-display text-k-text-primary">
+                    R$ {user.balance.toFixed(2)}
+                </p>
+            </div>
+             <button onClick={() => {
+                backendService.logout();
+                window.location.hash = '/login';
+                window.location.reload();
+             }} className="w-10 h-10 flex items-center justify-center bg-k-surface rounded-full border border-k-border text-k-text-secondary hover:text-k-text-primary transition-colors">
+                <IconProfile className="w-5 h-5"/>
+            </button>
         </div>
       </header>
 
@@ -111,25 +188,30 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Action Button */}
+      {/* Main Action: Reward Card or Watch Button */}
       <div className="pt-4">
-        <Button onClick={handleWatchAd} isLoading={adLoading} disabled={adLoading}>
-          {adLoading ? t('watching_ad') : t('watch_and_earn')}
-        </Button>
+        {lastChest ? (
+            <div className="bg-gradient-to-br from-k-surface to-k-bg border border-k-border rounded-xl p-4 space-y-4 text-center animate-fade-in-up">
+                <div className="flex justify-center items-center h-24">
+                    <div 
+                        className="relative w-20 h-20 animate-pulse-glow" 
+                        style={{ '--glow-color': CHEST_DEFINITIONS[lastChest.rarity].color.includes('gradient') ? 'rgba(255,255,255,0.2)' : CHEST_DEFINITIONS[lastChest.rarity].color + '40' } as React.CSSProperties}
+                    >
+                        <IconChest className="w-full h-full text-k-text-primary" />
+                    </div>
+                </div>
+                <h3 className="text-lg font-bold font-display" style={{ color: CHEST_DEFINITIONS[lastChest.rarity].color }}>
+                    Você ganhou um {CHEST_DEFINITIONS[lastChest.rarity].name}!
+                </h3>
+                <p className="text-sm text-k-text-secondary -mt-3">Abra para revelar sua recompensa.</p>
+                <Button onClick={() => handleOpenChestClick(lastChest)}>ABRIR AGORA</Button>
+            </div>
+        ) : (
+            <Button onClick={handleWatchAd} isLoading={adLoading} disabled={adLoading || isOpeningChest}>
+                {adLoading ? t('watching_ad') : t('watch_and_earn')}
+            </Button>
+        )}
       </div>
-
-      {/* Last Chest Won Modal (Simplified) */}
-      {lastChest && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in" onClick={() => setLastChest(null)}>
-              <div className="bg-k-surface border border-k-border p-8 rounded-xl text-center space-y-4 animate-pop-in w-11/12 max-w-sm" onClick={(e) => e.stopPropagation()}>
-                  <p className="text-k-text-secondary uppercase text-xs tracking-widest">Você ganhou um</p>
-                  <h3 className="text-2xl font-bold font-display" style={{ color: CHEST_DEFINITIONS[lastChest.rarity].color }}>
-                      {CHEST_DEFINITIONS[lastChest.rarity].name}
-                  </h3>
-                  <Button onClick={handleOpenChest}>ABRIR BAÚ</Button>
-              </div>
-          </div>
-      )}
 
       {/* Daily Missions Card */}
       <div 

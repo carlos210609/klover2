@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface SvgIconProps {
@@ -15,6 +16,16 @@ export const IconHome = ({ className }: { className?: string }) => (
   <SvgIcon className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
   </SvgIcon>
+);
+
+export const IconKlover = ({ className }: { className?: string }) => (
+    <SvgIcon className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2c0 5.523-4.477 10-10 10" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M22 12c-5.523 0-10-4.477-10-10" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 22c0-5.523 4.477-10 10-10" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2 12c5.523 0 10 4.477 10 10" />
+    </SvgIcon>
 );
 
 export const IconMissions = ({ className }: { className?: string }) => (

@@ -47,6 +47,8 @@
               'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
               'shimmer': 'shimmer 2.5s linear infinite',
               'gradient-pan': 'gradientPan 15s ease infinite',
+              'shake': 'shake 1.5s cubic-bezier(.36,.07,.19,.97) forwards',
+              'reward-reveal': 'rewardReveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
             },
             keyframes: {
               fadeIn: {
@@ -77,6 +79,15 @@
                 '0%': { backgroundPosition: '0% 50%' },
                 '50%': { backgroundPosition: '100% 50%' },
                 '100%': { backgroundPosition: '0% 50%' },
+              },
+              shake: {
+                '0%, 100%': { transform: 'translateX(0) rotate(0)' },
+                '10%, 50%, 90%': { transform: 'translateX(-5px) rotate(-2deg)' },
+                '30%, 70%': { transform: 'translateX(5px) rotate(2deg)' },
+              },
+              rewardReveal: {
+                  '0%': { opacity: '0', transform: 'translateY(30px) scale(0.95)' },
+                  '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
               }
             },
           },
