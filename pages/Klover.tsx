@@ -14,7 +14,7 @@ const Klover = () => {
       >
         <div className="absolute inset-0 bg-k-accent rounded-full animate-pulse-glow opacity-75"></div>
         <div className="relative bg-k-bg p-8 rounded-full">
-           <IconKlover />
+           <IconKlover className="w-24 h-24 text-k-accent" />
         </div>
       </div>
       
