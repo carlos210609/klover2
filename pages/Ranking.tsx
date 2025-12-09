@@ -1,70 +1,68 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { backendService } from '../services/mockBackend';
-import { RankEntry, User } from '../types';
+import { MarketData } from '../types';
 import { useLanguage } from '../App';
 
-const RankRow = ({ entry, isCurrentUser }: { entry: RankEntry; isCurrentUser: boolean }) => (
+const MarketRow = ({ asset, index }: { asset: MarketData; index: number }) => {
+    const isPositive = asset.change24h >= 0;
+    return (
     <div 
-      className={`flex items-center p-3 rounded-lg transition-all duration-300 animate-fade-in-up ${isCurrentUser ? 'bg-k-accent/10 border border-k-accent' : 'border border-transparent'}`}
-      style={{ animationDelay: `${entry.rank * 50}ms` }}
+      className="flex items-center justify-between p-3 rounded-lg animate-fade-in-up"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
-        <div className="w-10 font-display text-lg font-bold text-center text-k-text-secondary">{entry.rank}</div>
-        <div className="flex items-center gap-3 flex-1">
-            <img 
-              src={entry.photoUrl || `https://api.dicebear.com/8.x/bottts/svg?seed=${entry.username}`}
-              alt={entry.username} 
-              className="w-10 h-10 rounded-full border-2 border-k-border"
-            />
+        <div className="flex items-center gap-4">
+            <img src={asset.iconUrl} alt={asset.name} className="w-10 h-10" />
             <div>
-                <p className="font-bold text-k-text-primary">{entry.username}</p>
-                <p className="text-sm text-k-text-secondary">Nível {entry.level}</p>
+                <p className="font-bold text-k-text-primary">{asset.name}</p>
+                <p className="text-sm text-k-text-secondary">{asset.symbol}</p>
             </div>
         </div>
         <div className="text-right">
-            <p className="font-bold font-mono text-k-text-primary">{entry.xp.toLocaleString()}</p>
-            <p className="text-xs text-k-text-tertiary">XP</p>
+            <p className="font-mono font-bold text-k-text-primary">R$ {asset.priceBRL.toFixed(2).replace('.', ',')}</p>
+            <p className={`text-sm font-semibold ${isPositive ? 'text-k-green' : 'text-red-500'}`}>
+                {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
+            </p>
         </div>
     </div>
-);
+    )
+};
 
 
-const Ranking = () => {
+const Markets = () => {
     const { t } = useLanguage();
-    const [ranking, setRanking] = useState<RankEntry[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [marketData, setMarketData] = useState<MarketData[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
-        setLoading(true);
         try {
-            const [rankData, userData] = await Promise.all([
-                backendService.getRanking(),
-                backendService.getUser(),
-            ]);
-            setRanking(rankData);
-            setCurrentUser(userData);
+            const data = await backendService.getMarketData();
+            setMarketData(data);
         } catch (error) {
-            console.error("Failed to fetch ranking data:", error);
+            console.error("Failed to fetch market data:", error);
         }
         setLoading(false);
     }, []);
 
     useEffect(() => {
-        fetchData();
+        setLoading(true);
+        fetchData(); // Initial fetch
+        const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
+        return () => clearInterval(interval);
     }, [fetchData]);
 
     return (
         <div className="p-4">
-            <h1 className="font-display text-3xl font-bold text-k-text-primary mb-6">{t('nav_ranking')}</h1>
+            <h1 className="font-display text-3xl font-bold text-k-text-primary mb-6">{t('market_trends')}</h1>
 
-            {loading ? (
+            {loading && marketData.length === 0 ? (
                 <div className="flex justify-center mt-12">
                     <div className="w-8 h-8 border-2 border-k-border border-t-k-accent rounded-full animate-spin"></div>
                 </div>
             ) : (
                 <div className="flex flex-col gap-2">
-                    {ranking.map((entry) => (
-                        <RankRow key={entry.userId} entry={entry} isCurrentUser={entry.userId === currentUser?.id} />
+                    {marketData.map((asset, index) => (
+                        <MarketRow key={asset.id} asset={asset} index={index} />
                     ))}
                 </div>
             )}
@@ -72,4 +70,4 @@ const Ranking = () => {
     );
 };
 
-export default Ranking;
+export default Markets;

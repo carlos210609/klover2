@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { ROUTES } from '../constants';
-import { IconHome, IconWallet, IconMissions, IconRanking, IconKlover } from './Icons';
+import { IconHome, IconChart, IconSwap, IconUser } from './Icons';
 
 interface NavItemProps {
   to: string;
@@ -31,11 +32,10 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
   const showNavbar = location.pathname !== '/login';
 
   const navItems = [
-    { to: ROUTES.HOME, label: t('nav_home'), icon: <IconHome /> },
-    { to: ROUTES.MISSIONS, label: t('nav_missions'), icon: <IconMissions /> },
-    { to: ROUTES.KLOVER, label: t('nav_klover'), icon: <IconKlover /> },
-    { to: ROUTES.WALLET, label: t('nav_wallet'), icon: <IconWallet /> },
-    { to: ROUTES.RANKING, label: t('nav_ranking'), icon: <IconRanking /> },
+    { to: ROUTES.DASHBOARD, label: t('nav_dashboard'), icon: <IconHome /> },
+    { to: ROUTES.MARKETS, label: t('nav_markets'), icon: <IconChart /> },
+    { to: ROUTES.SWAP, label: t('nav_swap'), icon: <IconSwap /> },
+    { to: ROUTES.PROFILE, label: t('nav_profile'), icon: <IconUser /> },
   ];
 
   return (

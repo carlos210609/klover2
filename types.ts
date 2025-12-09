@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: string | number;
   username: string;
@@ -6,22 +7,9 @@ export interface User {
   firstName?: string;
   photoUrl?: string;
   
-  // Klover 2.0 Economy
-  balance: number; // Main currency (BRL)
-  tonBalance: number;
-  xp: number;
-  level: number;
+  // Klover Crypto Bank
+  portfolio: PortfolioAsset[];
   
-  // Klover 2.0 Rewards
-  chests: Chest[];
-  activeBoosters: Booster[];
-  dailyStreak: number;
-  lastLogin: string;
-
-  // Referral System
-  referredBy?: string;
-  referralEarnings: number;
-
   // Metadata
   joinDate: string;
   status: 'ACTIVE' | 'FLAGGED' | 'BANNED';
@@ -29,49 +17,33 @@ export interface User {
 
 export type Language = 'en' | 'pt';
 
-// --- REWARD SYSTEM ---
+// --- CRYPTO ASSETS ---
 
-export type ChestRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'DIVINE' | 'ULTRA_DIVINE';
-
-export interface Chest {
-  id: string;
-  rarity: ChestRarity;
-  acquiredAt: number;
+export interface CryptoAsset {
+  id: string; // e.g., 'bitcoin'
+  symbol: string; // e.g., 'BTC'
+  name: string; // e.g., 'Bitcoin'
+  iconUrl: string;
 }
 
-export interface Mission {
-  id: string;
-  type: 'DAILY' | 'WEEKLY';
-  title: string;
-  description: string;
-  goal: number;
-  progress: number;
-  reward: { type: 'XP' | 'CHEST', value: number | ChestRarity };
-  isComplete: boolean;
+export interface PortfolioAsset {
+  assetId: string; // 'bitcoin'
+  amount: number;
 }
 
-export interface Booster {
-  id: '2X_REWARDS' | 'XP_BOOSTER' | 'RARE_DROP_BOOSTER';
-  name: string;
-  description: string;
-  durationSeconds: number;
-  expiresAt: number;
+export interface MarketData extends CryptoAsset {
+  priceBRL: number;
+  change24h: number; // Percentage change
 }
+
 
 // --- TRANSACTIONS ---
 
 export enum TransactionType {
-  AD_REWARD = 'AD_REWARD',
-  CHEST_REWARD = 'CHEST_REWARD',
-  MISSION_REWARD = 'MISSION_REWARD',
-  BOOSTER_PURCHASE = 'BOOSTER_PURCHASE',
+  DEPOSIT = 'DEPOSIT',
   WITHDRAWAL = 'WITHDRAWAL',
-  REFERRAL = 'REFERRAL',
-}
-
-export enum WithdrawalMethod {
-  PIX = 'PIX',
-  TON = 'TON',
+  SWAP_IN = 'SWAP_IN',
+  SWAP_OUT = 'SWAP_OUT',
 }
 
 export enum TransactionStatus {
@@ -83,22 +55,13 @@ export enum TransactionStatus {
 export interface Transaction {
   id: string;
   type: TransactionType;
+  assetId: string;
   amount: number;
-  currency: 'BRL' | 'TON' | 'XP';
-  method?: WithdrawalMethod;
   status: TransactionStatus;
   timestamp: number;
-  details?: string;
-}
-
-// --- RANKING ---
-export interface RankEntry {
-  rank: number;
-  userId: string | number;
-  username: string;
-  photoUrl: string;
-  level: number;
-  xp: number;
+  details?: {
+    [key: string]: any; // For swap details, addresses, etc.
+  };
 }
 
 
@@ -123,25 +86,11 @@ export interface TelegramWebApp {
   platform: string;
 }
 
-// --- TELEGA ADS SDK ---
-export interface TelegaAdShowResult {
-    // Define properties based on SDK documentation if available
-    success: boolean; 
-}
-
-export interface TelegaAdsController {
-    ad_show(params: { adBlockUuid: string }): Promise<TelegaAdShowResult>;
-}
 
 declare global {
   interface Window {
     Telegram: {
       WebApp: TelegramWebApp;
-    };
-    TelegaIn?: {
-      AdsController: {
-        create_miniapp(config: { token: string }): TelegaAdsController;
-      }
     };
   }
 }

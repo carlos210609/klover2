@@ -1,118 +1,102 @@
 
-import { ChestRarity, Mission } from './types';
+import { CryptoAsset } from './types';
 
 export const APP_NAME = "KLOVER";
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.0.0-CRYPTO";
 
-// Ad Configuration (Telega.io)
-export const TELEGA_TOKEN = "165a86f6-e5b4-482f-9e05-dac8e12daa56";
-export const REWARDED_AD_BLOCK_ID = "c953f2cc-2fc2-4bc1-9400-5ab3ed480e2c";
+// --- SECURITY WARNING ---
+// The bot token provided should NEVER be stored in client-side code.
+// This is a major security risk. It must be kept on a secure backend server.
+// This is a placeholder for demonstration purposes only.
+export const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"; 
 
-// --- KLOVER OMEGA SYSTEM ---
 
-// 1. User Levels & XP
-export const LEVELS = Array.from({ length: 100 }, (_, i) => ({
-  level: i + 1,
-  xpRequired: Math.floor(100 * Math.pow(1.15, i)),
-  name: `Rank ${i+1}` // Simple naming, can be expanded (Bronze, Silver etc)
-}));
+// --- KLOVER CRYPTO BANK ---
 
-// 2. Base Rewards
-export const BASE_AD_REWARD_XP = 10;
-export const REFERRAL_RATE = 0.15; // 15% Commission
-
-// 3. Chest Definitions
-export const CHEST_DEFINITIONS: Record<ChestRarity, { name: string, color: string, probability: number, rewards: any[] }> = {
-  COMMON:       { name: "Baú Comum",    color: "#A0A0B0", probability: 0.65, rewards: [{ type: 'BRL', min: 0.01, max: 0.05 }] },
-  RARE:         { name: "Baú Raro",      color: "#00A8FF", probability: 0.25, rewards: [{ type: 'BRL', min: 0.05, max: 0.15 }] },
-  EPIC:         { name: "Baú Épico",     color: "#B400FF", probability: 0.07, rewards: [{ type: 'BRL', min: 0.20, max: 0.50 }] },
-  LEGENDARY:    { name: "Baú Lendário",  color: "#FFD700", probability: 0.02, rewards: [{ type: 'BRL', min: 0.50, max: 2.00 }] },
-  DIVINE:       { name: "Baú Divino",    color: "#FFFFFF", probability: 0.009,rewards: [{ type: 'BRL', min: 2.50, max: 10.00 }] },
-  ULTRA_DIVINE: { name: "Baú Ultra Divino", color: "linear-gradient(to right, #00A8FF, #B400FF, #FFD700)", probability: 0.001, rewards: [{ type: 'BRL', min: 10.00, max: 50.00 }] },
-};
-
-// 4. Missions (Example definitions)
-export const DAILY_MISSIONS: Omit<Mission, 'progress' | 'isComplete'>[] = [
-  { id: 'daily_watch_5', type: 'DAILY', title: "Assista 5 Anúncios", description: "Complete 5 streams de anúncio.", goal: 5, reward: { type: 'XP', value: 50 } },
-  { id: 'daily_watch_10', type: 'DAILY', title: "Assista 10 Anúncios", description: "Complete 10 streams de anúncio.", goal: 10, reward: { type: 'CHEST', value: 'RARE' } },
-];
-export const WEEKLY_MISSIONS: Omit<Mission, 'progress' | 'isComplete'>[] = [
-  { id: 'weekly_watch_50', type: 'WEEKLY', title: "Assista 50 Anúncios", description: "Complete 50 streams durante a semana.", goal: 50, reward: { type: 'CHEST', value: 'EPIC' } },
+export const SUPPORTED_ASSETS: CryptoAsset[] = [
+    {
+        id: 'bitcoin',
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        iconUrl: 'https://img.icons8.com/fluency/48/bitcoin.png'
+    },
+    {
+        id: 'ethereum',
+        symbol: 'ETH',
+        name: 'Ethereum',
+        iconUrl: 'https://img.icons8.com/fluency/48/ethereum.png'
+    },
+    {
+        id: 'toncoin',
+        symbol: 'TON',
+        name: 'Toncoin',
+        iconUrl: 'https://img.icons8.com/fluency/48/toncoin.png'
+    },
+    {
+        id: 'tether',
+        symbol: 'USDT',
+        name: 'Tether',
+        iconUrl: 'https://img.icons8.com/fluency/48/tether.png'
+    }
 ];
 
 
 // --- API & ROUTES ---
-export const API_URL = "https://api.klover.app/v1"; 
+export const API_URL = "https://api.klover.app/v2"; 
 
 export const ROUTES = {
-  HOME: "/",
-  KLOVER: "/klover",
-  MISSIONS: "/missions",
-  WALLET: "/wallet",
-  RANKING: "/ranking",
+  DASHBOARD: "/",
+  MARKETS: "/markets",
+  SWAP: "/swap",
+  WALLET: "/wallet", // Will be /wallet/:assetId
   PROFILE: "/profile",
-};
-
-export const MIN_WITHDRAWAL = {
-  PIX: 5.00, // R$5.00
-  TON: 1.0 // 1 TON
 };
 
 
 // --- TRANSLATIONS ---
 export const TRANSLATIONS = {
   en: {
-    nav_home: "Home",
-    nav_klover: "Klover",
-    nav_missions: "Missions",
-    nav_wallet: "Wallet",
-    nav_ranking: "Ranking",
+    nav_dashboard: "Dashboard",
+    nav_markets: "Markets",
+    nav_swap: "Swap",
     nav_profile: "Profile",
     // Add more translations as needed...
   },
   pt: {
-    nav_home: "Início",
-    nav_klover: "Klover",
-    nav_missions: "Missões",
-    nav_wallet: "Carteira",
-    nav_ranking: "Ranking",
+    nav_dashboard: "Painel",
+    nav_markets: "Mercado",
+    nav_swap: "Trocar",
     nav_profile: "Perfil",
     
-    // Home
-    total_balance: "Saldo Total",
-    level: "Nível",
-    daily_missions: "Missões Diárias",
-    watch_and_earn: "ASSISTIR E GANHAR",
-    watching_ad: "CARREGANDO STREAM...",
+    // Dashboard
+    portfolio_value: "Valor do Portfólio",
+    your_assets: "Seus Ativos",
+    deposit: "Depositar",
+    withdraw: "Sacar",
     
     // Wallet
-    withdraw_funds: "Sacar Fundos",
-    withdraw_method: "Método de Saque",
-    pix_key: "Chave PIX",
-    ton_address: "Endereço TON",
-    amount_brl: "Valor (BRL)",
-    amount_ton: "Valor (TON)",
-    confirm_withdrawal: "CONFIRMAR SAQUE",
-    processing: "PROCESSANDO...",
-    min_withdrawal: "Mínimo",
+    total_balance: "Saldo Total",
+    transaction_history: "Histórico de Transações",
     
-    // Missions
-    missions: "Missões",
-    daily: "Diárias",
-    weekly: "Semanais",
-    claim: "RESGATAR",
-    claimed: "RESGATADO",
+    // Markets
+    market_trends: "Tendências de Mercado",
+    price: "Preço",
+    change_24h: "Variação 24h",
+
+    // Swap
+    from: "De",
+    to: "Para",
+    you_pay: "Você envia",
+    you_receive: "Você recebe",
+    rate: "Taxa",
+    insufficient_balance: "Saldo insuficiente",
+    confirm_swap: "CONFIRMAR TROCA",
     
     // Profile
     profile_settings: "Configurações",
     user_id: "ID de Usuário",
     disconnect: "Desconectar",
     
-    // Klover
-    klover_omega_protocol: "KLOVER OMEGA PROTOCOL",
-    klover_description: "A próxima evolução da recompensa digital. Ative o protocolo para desbloquear potencial ilimitado, multiplicadores de ganhos e acesso a recompensas de nível Divino.",
-    protocol_offline: "PROTOCOLO OFFLINE",
-
     // General
     status: "Status",
     error: "Erro",

@@ -2,15 +2,15 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import Home from './pages/Home';
+import Dashboard from './pages/Home'; // Renamed Home to Dashboard conceptually
 import Wallet from './pages/Wallet';
-import Klover from './pages/Klover';
+import Markets from './pages/Ranking';
+import Swap from './pages/Missions';
+import Profile from './pages/Klover';
 import Login from './pages/Login';
-import Missions from './pages/Missions';
-import Ranking from './pages/Ranking';
 import { backendService } from './services/mockBackend';
 import { TRANSLATIONS } from './constants';
-import { Language, User } from './types';
+import { Language } from './types';
 
 // --- LANGUAGE CONTEXT ---
 interface LanguageContextType {
@@ -46,9 +46,6 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return backendService.isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// --- PROFILE PAGE (MOVED INTO HOME HEADER) ---
-// The profile is now more integrated into the Home page header, so a separate page is not needed.
-
 // --- MAIN APP CONTENT ---
 const AppContent = () => {
   const navigate = useNavigate();
@@ -67,7 +64,7 @@ const AppContent = () => {
 
         if (tg.initDataUnsafe?.user) {
           try {
-            await backendService.loginWithTelegram(tg.initDataUnsafe, tg.initDataUnsafe.start_param);
+            await backendService.loginWithTelegram(tg.initDataUnsafe);
             setIsInitializing(false);
             navigate('/');
             return;
@@ -88,7 +85,6 @@ const AppContent = () => {
   }, []);
 
   if (isInitializing) {
-     // This loader will be replaced by the one in index.html, but serves as a fallback.
     return (
       <div className="h-screen w-full flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-k-border border-t-k-accent rounded-full animate-spin"></div>
@@ -99,12 +95,11 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
-      <Route path="/missions" element={<RequireAuth><Missions /></RequireAuth>} />
-      <Route path="/klover" element={<RequireAuth><Klover /></RequireAuth>} />
-      <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
-      <Route path="/ranking" element={<RequireAuth><Ranking /></RequireAuth>} />
-      {/* <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} /> */}
+      <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
+      <Route path="/markets" element={<RequireAuth><Markets /></RequireAuth>} />
+      <Route path="/swap" element={<RequireAuth><Swap /></RequireAuth>} />
+      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+      <Route path="/wallet/:assetId" element={<RequireAuth><Wallet /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
