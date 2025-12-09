@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -28,7 +29,7 @@ const Wallet: React.FC = () => {
     const numAmount = parseFloat(amount);
 
     if (isNaN(numAmount) || numAmount < MIN_WITHDRAWAL[method]) {
-        setMessage({type: 'error', text: `${t('error_min')} $${MIN_WITHDRAWAL[method]}`});
+        setMessage({type: 'error', text: `${t('error_min')} R$${MIN_WITHDRAWAL[method]}`});
         setLoading(false);
         return;
     }
@@ -56,7 +57,7 @@ const Wallet: React.FC = () => {
          <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
          <p className="text-[10px] text-white/50 font-tech mb-2 uppercase tracking-widest">{t('avail_bal')}</p>
          <div className="flex items-baseline gap-1">
-             <p className="text-4xl font-mono font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">${balance.toFixed(4)}</p>
+             <p className="text-4xl font-mono font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">R${balance.toFixed(2)}</p>
          </div>
       </div>
 
@@ -110,14 +111,14 @@ const Wallet: React.FC = () => {
           <div>
             <label className="block text-[9px] font-tech text-cyan-400 mb-2 uppercase tracking-widest">{t('label_amount')}</label>
             <div className="relative group">
-              <span className="absolute left-3 top-3 text-white/30 group-focus-within:text-white transition-colors font-mono">$</span>
+              <span className="absolute left-3 top-3 text-white/30 group-focus-within:text-white transition-colors font-mono">R$</span>
               <input
                 type="number"
-                step="0.0001"
+                step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 pl-7 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
-                placeholder="0.0000"
+                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 pl-10 text-base text-white focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all font-mono placeholder-white/10"
+                placeholder="0.00"
                 required
               />
             </div>
@@ -126,7 +127,7 @@ const Wallet: React.FC = () => {
                 FEE: <span className="text-white/50">0%</span>
                 </p>
                 <p className="text-[9px] text-white/30 font-mono">
-                {t('min_withdraw')}: <span className="text-white/70">${MIN_WITHDRAWAL[method]}</span>
+                {t('min_withdraw')}: <span className="text-white/70">R${MIN_WITHDRAWAL[method]}</span>
                 </p>
             </div>
           </div>

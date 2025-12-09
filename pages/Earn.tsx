@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -70,9 +71,20 @@ const Earn: React.FC = () => {
       const result = await backendService.spinRoulette();
       
       const spinDuration = 3000;
-      const extraSpins = 360 * 8; 
-      const randomOffset = Math.floor(Math.random() * 360);
-      setRotation(rotation + extraSpins + randomOffset);
+      
+      // Calculate target angle to land on prize
+      const prizeIndex = ROULETTE_PRIZES.findIndex(p => p.id === result.prize.id);
+      const segmentSize = 360 / ROULETTE_PRIZES.length;
+      // Landing in the middle of the segment
+      const prizeAngle = (prizeIndex * segmentSize) + (segmentSize / 2);
+      
+      // Calculate rotation: 
+      // Current Rotation + 5 Full Spins + (360 - Prize Angle) to align visually at top or pointer
+      // Assuming pointer is at top (0deg), we need to rotate so prize segment is at 0deg.
+      // Actually CSS rotation rotates clockwise. To bring a segment at angle X to top (0), we rotate by -X (or 360-X).
+      const targetRotation = rotation + (360 * 5) + (360 - prizeAngle + 90); // +90 adjustment if needed based on CSS start
+
+      setRotation(targetRotation);
 
       setTimeout(() => {
         setIsSpinning(false);
@@ -122,7 +134,8 @@ const Earn: React.FC = () => {
            style={{ 
              background: `conic-gradient(${gradientString})`,
              transform: `rotate(${rotation}deg)`,
-             transitionDuration: isSpinning ? '3s' : '0s'
+             transitionDuration: isSpinning ? '3s' : '0s',
+             transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
            }}
          >
          </div>

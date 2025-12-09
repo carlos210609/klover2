@@ -41,7 +41,7 @@ export interface Transaction {
   id: string;
   type: TransactionType;
   amount: number; // Amount or Points
-  currency?: 'USD' | 'PTS';
+  currency?: 'USD' | 'PTS' | 'BRL';
   method?: WithdrawalMethod;
   status: TransactionStatus;
   timestamp: number;
@@ -55,7 +55,7 @@ export interface ShopItem {
   name: string;
   description: string;
   price: number;
-  currency: 'USD' | 'PTS';
+  currency: 'USD' | 'PTS' | 'BRL';
   icon: string;
   rarity: ItemRarity;
 }

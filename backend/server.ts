@@ -1,3 +1,4 @@
+
 /**
  * KLOVER BACKEND - Node.js / Express
  * Sistema de Persistência em Arquivo JSON
@@ -62,44 +63,22 @@ const saveDb = (data: Database) => {
   }
 };
 
-// --- HELPER: Validate Telegram WebApp Data ---
-const verifyTelegramWebAppData = (telegramInitData: string) => {
-  const urlParams = new URLSearchParams(telegramInitData);
-  const hash = urlParams.get('hash');
-  urlParams.delete('hash');
-  
-  const paramsList: string[] = [];
-  for (const [key, value] of urlParams.entries()) {
-    paramsList.push(`${key}=${value}`);
-  }
-  const dataCheckString = paramsList.sort().join('\n');
-
-  const secret = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
-  const calculatedHash = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
-
-  return calculatedHash === hash;
-};
-
 // --- HELPER: FaucetPay API Call ---
-const sendFaucetPayPayout = async (to: string, amountUSD: number) => {
+const sendFaucetPayPayout = async (to: string, amountBRL: number) => {
   if (FAUCETPAY_API_KEY === "YOUR_FAUCETPAY_API_KEY_HERE") {
     console.warn("MOCKING FAUCETPAY: API Key not set.");
     return { status: 200, message: "Mock payout successful" };
   }
 
-  // Conversão simples: Assumindo que o saldo é em USD e enviamos USDT
-  // A FaucetPay aceita 'amount' em satoshis para BTC, mas para USDT geralmente é a unidade inteira ou baseada na moeda.
-  // Vamos usar o endpoint /send
-  
+  // Conversão BRL -> USD Simples (Exemplo: 1 BRL = 0.20 USD)
+  const amountUSD = amountBRL * 0.20; 
+
   try {
     const params = new URLSearchParams();
     params.append('api_key', FAUCETPAY_API_KEY);
-    params.append('amount', (amountUSD * 100000000).toString()); // Satoshis (se for BTC) ou ajuste conforme moeda
+    params.append('amount', (amountUSD * 100000000).toFixed(0)); // Satoshis (Exemplo para BTC/USDT em ints)
     params.append('to', to);
     params.append('currency', FAUCETPAY_CURRENCY);
-    
-    // Nota: FaucetPay documentation pode variar. Para USDT, verifique a escala decimal correta.
-    // Este é um exemplo genérico.
     
     const response = await fetch('https://faucetpay.io/api/v1/send', {
       method: 'POST',
@@ -145,10 +124,6 @@ app.post('/api/auth/telegram', (req, res) => {
     return res.status(400).json({ error: 'No initData provided' });
   }
 
-  // Validate only if running in production with real data
-  // const isValid = verifyTelegramWebAppData(initData);
-  // if (!isValid) return res.status(403).json({ error: 'Invalid Telegram data' });
-
   const urlParams = new URLSearchParams(initData);
   const userJson = urlParams.get('user');
   
@@ -182,7 +157,7 @@ app.post('/api/auth/telegram', (req, res) => {
 
 // 3. Auth: Email (FaucetPay Style)
 app.post('/api/auth/email', (req, res) => {
-  const { email } = req.body;
+  const { email, referralCode } = req.body;
   if (!email) return res.status(400).json({ error: 'Email required' });
 
   const db = loadDb();
@@ -202,7 +177,8 @@ app.post('/api/auth/email', (req, res) => {
       spins: 1,
       points: 0,
       totalEarnings: 0.00,
-      joinDate: new Date().toISOString()
+      joinDate: new Date().toISOString(),
+      referredBy: referralCode // Salvar quem indicou
     };
     db.users[newId] = foundUser;
     saveDb(db);
@@ -227,7 +203,41 @@ app.post('/api/action/update', (req, res) => {
     res.status(404).json({ error: 'User not found' });
 });
 
-// 5. WITHDRAWAL ENDPOINT (REAL)
+// 5. Referral Action (Credit Referrer)
+app.post('/api/action/referral', (req, res) => {
+    const { referrerId, amount, currency } = req.body;
+    const db = loadDb();
+
+    if (db.users[referrerId]) {
+        if (currency === 'BRL') {
+            db.users[referrerId].balance += amount;
+        } else {
+            db.users[referrerId].points += amount;
+        }
+        
+        if (!db.users[referrerId].referralEarnings) db.users[referrerId].referralEarnings = 0;
+        db.users[referrerId].referralEarnings += amount;
+
+        // Log Referral TX
+        const tx = {
+            id: `ref_${Date.now()}`,
+            userId: referrerId,
+            type: 'REFERRAL',
+            amount: amount,
+            currency: currency,
+            status: 'COMPLETED',
+            timestamp: Date.now(),
+            details: "Referral Commission"
+        };
+        db.transactions.unshift(tx);
+
+        saveDb(db);
+        return res.json({ success: true });
+    }
+    res.json({ success: false }); // Silent fail if referrer invalid
+});
+
+// 6. WITHDRAWAL ENDPOINT (REAL)
 app.post('/api/withdraw', async (req, res) => {
   const { userId, amount, address, method } = req.body;
   
@@ -258,7 +268,7 @@ app.post('/api/withdraw', async (req, res) => {
       userId: user.id,
       type: 'WITHDRAWAL',
       amount: amount,
-      currency: 'USD',
+      currency: 'BRL',
       method: method,
       status: 'COMPLETED', // Or PENDING if manual
       timestamp: Date.now(),

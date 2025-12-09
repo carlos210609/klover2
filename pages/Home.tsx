@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -94,8 +95,8 @@ const Home: React.FC = () => {
                  <div className="flex flex-col">
                     <span className="text-[10px] font-tech text-white/40 uppercase tracking-[0.2em] mb-1">{t('total_balance')}</span>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-mono font-bold text-white tracking-tighter drop-shadow-lg group-hover:animate-tumble inline-block origin-bottom-left">${Math.floor(user.balance)}</span>
-                        <span className="text-2xl font-mono text-white/60">.{(user.balance % 1).toFixed(4).substring(2)}</span>
+                        <span className="text-4xl font-mono font-bold text-white tracking-tighter drop-shadow-lg group-hover:animate-tumble inline-block origin-bottom-left">R${Math.floor(user.balance)}</span>
+                        <span className="text-2xl font-mono text-white/60">.{(user.balance % 1).toFixed(2).substring(2)}</span>
                     </div>
                  </div>
                  <IconZap className="w-6 h-6 text-cyan-400 animate-pulse-slow" />
@@ -179,7 +180,7 @@ const Home: React.FC = () => {
              <div className="p-4 space-y-4">
                 <div className="flex justify-between text-xs font-mono">
                    <span className="text-white/40">{t('total_comm')}</span>
-                   <span className="text-white">${(user.referralEarnings || 0).toFixed(4)}</span>
+                   <span className="text-white">R${(user.referralEarnings || 0).toFixed(4)}</span>
                 </div>
                 
                 <div className="flex gap-2">

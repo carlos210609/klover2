@@ -2,11 +2,11 @@
 import { ShopItem } from './types';
 
 export const APP_NAME = "KLOVER";
-export const APP_VERSION = "1.2.0";
+export const APP_VERSION = "1.3.0";
 
 // Ad Configuration
 export const AD_ZONE_ID = "10283220";
-export const REWARD_PER_AD = 0.001; 
+export const REWARD_PER_AD = 0.05; // R$ 0.05
 export const REFERRAL_RATE = 0.30; // 30% Commission
 
 // API Endpoints
@@ -22,16 +22,16 @@ export const ROUTES = {
 };
 
 export const MIN_WITHDRAWAL = {
-  CWALLET: 0.40,
-  FAUCETPAY: 0.40
+  CWALLET: 2.00, // R$ 2.00
+  FAUCETPAY: 2.00
 };
 
 export const ROULETTE_PRIZES = [
-  { id: 'common_cash', type: 'CASH', value: 0.0005, label: '$0.0005', weight: 30, color: '#3b82f6' }, // Blue
+  { id: 'common_cash', type: 'CASH', value: 0.01, label: 'R$0.01', weight: 30, color: '#3b82f6' }, // Blue
   { id: 'common_points', type: 'POINTS', value: 10, label: '10 PTS', weight: 40, color: '#a855f7' }, // Purple
-  { id: 'rare_cash', type: 'CASH', value: 0.001, label: '$0.0010', weight: 20, color: '#22c55e' }, // Green
+  { id: 'rare_cash', type: 'CASH', value: 0.05, label: 'R$0.05', weight: 20, color: '#22c55e' }, // Green
   { id: 'rare_points', type: 'POINTS', value: 50, label: '50 PTS', weight: 8, color: '#f59e0b' }, // Amber
-  { id: 'jackpot', type: 'CASH', value: 0.005, label: '$0.0050', weight: 2, color: '#ef4444' }   // Red (Jackpot)
+  { id: 'jackpot', type: 'CASH', value: 0.25, label: 'R$0.25', weight: 2, color: '#ef4444' }   // Red (Jackpot)
 ];
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -46,7 +46,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   },
   {
     id: 'cash_conversion_1',
-    name: 'Cash Ticket ($0.01)',
+    name: 'Cash Ticket (R$0.10)',
     description: 'Instantly convert points to withdrawable balance.',
     price: 500,
     currency: 'PTS',
@@ -56,7 +56,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   {
     id: 'nano_miner',
     name: 'Nano Miner v1',
-    description: 'Cloud mining simulation: Instantly yields $0.05.',
+    description: 'Cloud mining simulation: Instantly yields R$0.50.',
     price: 2000,
     currency: 'PTS',
     icon: 'zap',
@@ -114,7 +114,7 @@ export const TRANSLATIONS = {
     method_faucetpay: "FAUCETPAY",
     label_cwallet: "CWallet Email / ID",
     label_faucetpay: "FaucetPay Address",
-    label_amount: "Amount (USD)",
+    label_amount: "Amount (BRL)",
     min_withdraw: "Min",
     process_tx: "PROCESSING TRANSACTION...",
     confirm_withdraw: "CONFIRM WITHDRAWAL",
@@ -189,7 +189,7 @@ export const TRANSLATIONS = {
     method_faucetpay: "FAUCETPAY",
     label_cwallet: "Email / ID CWallet",
     label_faucetpay: "Адрес FaucetPay",
-    label_amount: "Сумма (USD)",
+    label_amount: "Сумма (BRL)",
     min_withdraw: "Мин",
     process_tx: "ОБРАБОТКА ТРАНЗАКЦИИ...",
     confirm_withdraw: "ПОДТВЕРДИТЬ ВЫВОД",

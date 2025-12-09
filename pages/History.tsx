@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from 'react';
 import { backendService } from '../services/mockBackend';
 import { Transaction, TransactionType } from '../types';
@@ -67,7 +68,7 @@ const History: React.FC = () => {
                     <p className={`font-mono text-sm font-bold ${
                       tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]' : 'text-white'
                     }`}>
-                      {tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? '+' : '-'}${tx.amount.toFixed(4)}
+                      {tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? '+' : '-'}{tx.currency === 'PTS' ? '' : 'R$'}{tx.amount.toFixed(2)}
                     </p>
                     <div className={`text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full inline-block ${
                       tx.status === 'COMPLETED' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
