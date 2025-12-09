@@ -12,73 +12,62 @@ const History: React.FC = () => {
     backendService.getHistory().then(setTransactions);
   }, []);
 
-  const getTxLabel = (tx: Transaction) => {
+  const getTxInfo = (tx: Transaction): { icon: string; label: string; color: string; amountPrefix: string } => {
     switch(tx.type) {
-        case TransactionType.EARN: return t('lucky_spin');
-        case TransactionType.WITHDRAWAL: return `${t('withdraw_to')} ${tx.method}`;
-        case TransactionType.SHOP_PURCHASE: return t('shop_buy');
-        case TransactionType.REFERRAL: return t('referral_comm');
-        default: return tx.details || 'Transaction';
+        case TransactionType.AD_REWARD:
+        case TransactionType.CHEST_REWARD:
+        case TransactionType.MISSION_REWARD:
+        case TransactionType.REFERRAL:
+            return { icon: '✨', label: tx.details || 'Recompensa', color: 'text-k-green', amountPrefix: '+' };
+        case TransactionType.WITHDRAWAL:
+             return { icon: '💸', label: `Saque para ${tx.method}`, color: 'text-k-text-primary', amountPrefix: '-' };
+        case TransactionType.BOOSTER_PURCHASE:
+             return { icon: '🚀', label: tx.details || 'Compra', color: 'text-k-text-primary', amountPrefix: '-' };
+        default: return { icon: '?', label: 'Transação', color: 'text-k-text-secondary', amountPrefix: '' };
     }
   }
 
   return (
-    <div className="space-y-6 pt-6 animate-fade-in-up">
-      <h2 className="text-2xl font-bold font-mono px-2 tracking-tight">{t('history')}</h2>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold font-display text-k-text-primary">Histórico</h1>
       
-      <div className="space-y-4 pb-20">
+      <div className="space-y-3 pb-20">
         {transactions.length === 0 ? (
-          <div className="text-center text-white/30 py-10 font-mono text-sm border border-dashed border-white/10 rounded-xl">
-            {t('no_tx')}
+          <div className="text-center text-k-text-secondary py-16 border border-dashed border-k-border rounded-xl">
+            <p>Nenhuma transação ainda.</p>
           </div>
         ) : (
-          transactions.map((tx, index) => (
-            <div 
-              key={tx.id} 
-              className="relative group perspective-1000 animate-slide-up-fade opacity-0"
-              style={{ animationDelay: `${index * 80}ms` }}
-            >
-              <div className="relative transform transition-all duration-500 ease-out preserve-3d group-hover:[transform:rotateX(5deg)_scale(1.02)] origin-center">
-                {/* Glow Background */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-neon-blue/20 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                
-                {/* Card Content with White Neon Glow on Hover */}
-                <div className="relative bg-black/40 border border-white/10 rounded-xl p-4 flex justify-between items-center backdrop-blur-md shadow-lg transition-all duration-300 group-hover:bg-black/60 group-hover:border-white/50 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-xl ${
-                      tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL
-                        ? 'border-green-500/20 bg-green-500/5 text-green-400' 
-                        : 'border-blue-500/20 bg-blue-500/5 text-blue-400'
-                    }`}>
-                      <span className="text-sm">
-                        {tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? '⚡' : '↘'}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold font-mono text-white tracking-wide">
-                        {getTxLabel(tx)}
-                      </p>
-                      <p className="text-[10px] text-white/40 mt-0.5">
-                        {new Date(tx.timestamp).toLocaleString()}
-                      </p>
-                    </div>
+          transactions.map((tx) => {
+            const info = getTxInfo(tx);
+            return (
+              <div 
+                key={tx.id} 
+                className="bg-k-surface border border-k-border rounded-xl p-4 flex justify-between items-center"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-k-bg border border-k-border text-lg">
+                    {info.icon}
                   </div>
-                  <div className="text-right">
-                    <p className={`font-mono text-sm font-bold ${
-                      tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]' : 'text-white'
-                    }`}>
-                      {tx.type === TransactionType.EARN || tx.type === TransactionType.REFERRAL ? '+' : '-'}{tx.currency === 'PTS' ? '' : '$'}{tx.amount.toFixed(4)}
+                  <div>
+                    <p className="font-semibold text-k-text-primary">
+                      {info.label}
                     </p>
-                    <div className={`text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded-full inline-block ${
-                      tx.status === 'COMPLETED' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
-                    }`}>
-                      {tx.status}
-                    </div>
+                    <p className="text-xs text-k-text-tertiary mt-0.5">
+                      {new Date(tx.timestamp).toLocaleString()}
+                    </p>
                   </div>
                 </div>
+                <div className="text-right">
+                  <p className={`font-mono text-base font-bold ${info.color}`}>
+                    {info.amountPrefix} {tx.amount.toFixed(2)} {tx.currency}
+                  </p>
+                  <p className="text-[10px] text-k-text-tertiary uppercase mt-1">
+                    {tx.status}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

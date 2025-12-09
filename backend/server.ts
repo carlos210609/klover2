@@ -1,7 +1,7 @@
 
 /**
- * KLOVER BACKEND - Node.js / Express
- * Sistema de Persistência em Arquivo JSON
+ * KLOVER 2.0 BACKEND - Node.js / Express
+ * JSON File Persistence System
  */
 
 import express from 'express';
@@ -17,16 +17,12 @@ const __dirname = path.dirname(__filename);
 
 // --- CONFIG ---
 const PORT = process.env.PORT || 3000;
-const ADMIN_KEY = "KLOVER_SECRET_KEY"; // Chave para baixar o backup
+const ADMIN_KEY = "KLOVER_SECRET_KEY";
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// SECURITY WARNING: In production, use process.env.BOT_TOKEN
-const BOT_TOKEN = "8407232561:AAES_3QNfxtOUYFBbvS9MJlCM6ZIYZwf5B4"; 
-
-// --- FAUCETPAY CONFIGURATION ---
-// OBRIGATÓRIO: Coloque sua API Key da FaucetPay aqui
-const FAUCETPAY_API_KEY = "YOUR_FAUCETPAY_API_KEY_HERE"; 
-const FAUCETPAY_CURRENCY = "USDT"; // Moeda padrão para envio (USDT na rede TRC20 é comum no FaucetPay)
+// --- PAYMENT GATEWAY CONFIG (PLACEHOLDERS) ---
+const PIX_API_KEY = "YOUR_PIX_PROVIDER_API_KEY"; 
+const TON_WALLET_SECRET = "YOUR_TON_WALLET_SECRET";
 
 const app = express();
 app.use(cors());
@@ -38,7 +34,6 @@ interface Database {
   transactions: any[];
 }
 
-// Carregar DB
 const loadDb = (): Database => {
   if (!fs.existsSync(DB_FILE)) {
     const initialDb: Database = { users: {}, transactions: [] };
@@ -48,197 +43,96 @@ const loadDb = (): Database => {
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
   } catch (error) {
-    console.error("Erro ao ler DB, recriando...", error);
-    return { users: {}, transactions: [] };
+    console.error("Error reading DB, recreating...", error);
+    const backupDb: Database = { users: {}, transactions: [] };
+    fs.writeFileSync(DB_FILE, JSON.stringify(backupDb, null, 2));
+    return backupDb;
   }
 };
 
-// Salvar DB
 const saveDb = (data: Database) => {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (error) {
-    console.error("Erro ao salvar DB:", error);
+    console.error("Error saving DB:", error);
   }
 };
 
-// --- HELPER: FaucetPay API Call ---
-const sendFaucetPayPayout = async (to: string, amountUSD: number) => {
-  if (FAUCETPAY_API_KEY === "YOUR_FAUCETPAY_API_KEY_HERE") {
-    console.warn("MOCKING FAUCETPAY: API Key not set.");
-    return { status: 200, message: "Mock payout successful", txid: "mock_tx_" + Date.now() };
+// --- HELPER: Mock Payment API Calls ---
+const processPixPayout = async (to: string, amountBRL: number) => {
+  if (PIX_API_KEY === "YOUR_PIX_PROVIDER_API_KEY") {
+    console.warn("MOCKING PIX: API Key not set.");
+    await new Promise(r => setTimeout(r, 1500)); // Simulate API delay
+    return { success: true, txid: "mock_pix_" + Date.now() };
   }
-
-  try {
-    const params = new URLSearchParams();
-    params.append('api_key', FAUCETPAY_API_KEY);
-    // FaucetPay API expects satoshis for BTC, but for USDT it usually expects 8 decimal places int or similar.
-    // Documentation varies, but generally sends amount. 
-    // Assuming FaucetPay 'send' endpoint accepts 'amount' as standard unit or we adjust based on currency.
-    // For USDT, usually 1 = 1 USDT. If satoshis needed, multiply by 10^8.
-    // Let's assume 10^8 multiplier for safety or standard satoshi usage.
-    params.append('amount', (amountUSD * 100000000).toFixed(0)); 
-    params.append('to', to);
-    params.append('currency', FAUCETPAY_CURRENCY);
-    
-    const response = await fetch('https://faucetpay.io/api/v1/send', {
-      method: 'POST',
-      body: params
-    });
-
-    const data: any = await response.json();
-    
-    if (data.status === 200) {
-      return { success: true, txid: data.payout_id };
-    } else {
-      throw new Error(data.message || "FaucetPay API Error");
-    }
-  } catch (error: any) {
-    throw new Error(error.message || "Failed to connect to FaucetPay");
-  }
+  // Real implementation with Asaas, Gerencianet, etc. would go here
+  // const response = await fetch('https://api.paymentprovider.com/v1/pix/payout', ...);
+  // const data = await response.json();
+  // if(!response.ok) throw new Error(data.message);
+  // return { success: true, txid: data.transactionId };
+  throw new Error("PIX provider not implemented.");
 };
+
 
 // --- ENDPOINTS ---
 
-// 1. SCRIPT DE EXPORTAÇÃO / BACKUP
-// Acesse: GET /api/admin/users?adminKey=KLOVER_SECRET_KEY
-app.get('/api/admin/users', (req, res) => {
+// 1. Admin Backup
+app.get('/api/admin/data', (req, res) => {
   const { adminKey } = req.query;
-  
-  if (adminKey !== ADMIN_KEY) {
-    return res.status(403).json({ error: 'Acesso negado' });
-  }
-
+  if (adminKey !== ADMIN_KEY) return res.status(403).json({ error: 'Access denied' });
   const db = loadDb();
-  res.json({
-    count: Object.keys(db.users).length,
-    users: Object.values(db.users),
-    transactions: db.transactions
-  });
+  res.json(db);
 });
 
-// 2. Auth: Unified (Telegram OR Email)
+// 2. Auth: Telegram
 app.post('/api/auth/telegram', (req, res) => {
-  const { initData } = req.body;
+  const { initDataUnsafe, referralCode } = req.body;
+  const user = initDataUnsafe?.user;
 
-  if (!initData) {
-    return res.status(400).json({ error: 'No initData provided' });
-  }
-
-  const urlParams = new URLSearchParams(initData);
-  const userJson = urlParams.get('user');
-  
-  if (!userJson) return res.status(400).json({ error: 'No user data' });
-
-  const telegramUser = JSON.parse(userJson);
-  const db = loadDb();
-
-  // Find or Create User
-  let user = db.users[telegramUser.id.toString()];
-  
-  if (!user) {
-    user = {
-      id: telegramUser.id,
-      username: telegramUser.username,
-      email: telegramUser.username ? `${telegramUser.username}@telegram.user` : `tg_${telegramUser.id}`,
-      firstName: telegramUser.first_name,
-      photoUrl: telegramUser.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${telegramUser.first_name}`,
-      balance: 0.00,
-      spins: 1,
-      points: 0,
-      totalEarnings: 0.00,
-      joinDate: new Date().toISOString()
-    };
-    db.users[telegramUser.id.toString()] = user;
-    saveDb(db);
-  }
-
-  res.json({ user, token: 'session_token_persistent' });
-});
-
-// 3. Auth: Email (FaucetPay Style)
-app.post('/api/auth/email', (req, res) => {
-  const { email, referralCode } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email required' });
+  if (!user) return res.status(400).json({ error: 'Invalid Telegram data' });
 
   const db = loadDb();
+  let dbUser = db.users[user.id.toString()];
   
-  // Simple "Login by Email" lookup - extremely simplified for demo
-  let foundUser = Object.values(db.users).find((u: any) => u.email === email);
-  
-  if (!foundUser) {
-    const newId = Math.floor(Math.random() * 100000000).toString();
-    foundUser = {
-      id: newId,
-      username: email.split('@')[0],
-      email: email,
-      firstName: 'Klover User',
-      photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`,
+  if (!dbUser) {
+    dbUser = {
+      id: user.id,
+      username: user.username || `user${user.id}`,
+      email: `tg_${user.id}`,
+      firstName: user.first_name,
+      photoUrl: user.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.first_name}`,
       balance: 0.00,
-      spins: 1,
-      points: 0,
-      totalEarnings: 0.00,
+      tonBalance: 0.00,
+      xp: 0,
+      level: 1,
+      chests: [{ id: `chest_${Date.now()}`, rarity: 'COMMON', acquiredAt: Date.now() }],
       joinDate: new Date().toISOString(),
-      referredBy: referralCode // Salvar quem indicou
+      referredBy: referralCode,
+      status: 'ACTIVE'
     };
-    db.users[newId] = foundUser;
+    db.users[user.id.toString()] = dbUser;
     saveDb(db);
   }
 
-  res.json({ user: foundUser });
+  res.json({ user: dbUser });
 });
 
-// 4. Update Balance / Actions
-app.post('/api/action/update', (req, res) => {
-    const { userId, balance, spins, points } = req.body;
+// 3. Update User State (e.g., after ad reward)
+app.post('/api/user/update', (req, res) => {
+    const { userId, updates } = req.body; // updates can be { xp, level, balance, chests }
+    if (!userId || !updates) return res.status(400).json({ error: 'Missing parameters' });
+    
     const db = loadDb();
-
     if (db.users[userId]) {
-        if (balance !== undefined) db.users[userId].balance = balance;
-        if (spins !== undefined) db.users[userId].spins = spins;
-        if (points !== undefined) db.users[userId].points = points;
-        
+        db.users[userId] = { ...db.users[userId], ...updates };
         saveDb(db);
         return res.json({ success: true, user: db.users[userId] });
     }
     res.status(404).json({ error: 'User not found' });
 });
 
-// 5. Referral Action (Credit Referrer)
-app.post('/api/action/referral', (req, res) => {
-    const { referrerId, amount, currency } = req.body;
-    const db = loadDb();
 
-    if (db.users[referrerId]) {
-        if (currency === 'USD') {
-            db.users[referrerId].balance += amount;
-        } else {
-            db.users[referrerId].points += amount;
-        }
-        
-        if (!db.users[referrerId].referralEarnings) db.users[referrerId].referralEarnings = 0;
-        db.users[referrerId].referralEarnings += amount;
-
-        // Log Referral TX
-        const tx = {
-            id: `ref_${Date.now()}`,
-            userId: referrerId,
-            type: 'REFERRAL',
-            amount: amount,
-            currency: currency,
-            status: 'COMPLETED',
-            timestamp: Date.now(),
-            details: "Referral Commission"
-        };
-        db.transactions.unshift(tx);
-
-        saveDb(db);
-        return res.json({ success: true });
-    }
-    res.json({ success: false }); // Silent fail if referrer invalid
-});
-
-// 6. WITHDRAWAL ENDPOINT (REAL)
+// 4. WITHDRAWAL ENDPOINT
 app.post('/api/withdraw', async (req, res) => {
   const { userId, amount, address, method } = req.body;
   
@@ -246,22 +140,22 @@ app.post('/api/withdraw', async (req, res) => {
   const user = db.users[userId];
 
   if (!user) return res.status(404).json({ error: 'User not found' });
-  if (user.balance < amount) return res.status(400).json({ error: 'Insufficient funds' });
+  
+  const isPix = method === 'PIX';
+  if (isPix && user.balance < amount) return res.status(400).json({ error: 'Insufficient BRL funds' });
+  if (!isPix && user.tonBalance < amount) return res.status(400).json({ error: 'Insufficient TON funds' });
 
+  // 1. Deduct Balance Locally (Optimistic)
+  if (isPix) user.balance -= amount;
+  else user.tonBalance -= amount;
+  
   try {
-    // 1. Deduct Balance Locally (Optimistic)
-    user.balance -= amount;
-    
-    let txDetails = "";
-    let apiResult = { txid: "MANUAL" };
-    
-    if (method === 'FAUCETPAY') {
-       // CALL REAL FAUCETPAY API
-       apiResult = await sendFaucetPayPayout(address, amount) as any;
-       txDetails = `FP_ID: ${apiResult.txid}`;
+    let apiResult;
+    if (isPix) {
+       apiResult = await processPixPayout(address, amount);
     } else {
-       // CWallet implementation placeholder
-       txDetails = "Manual/Cwallet Processing";
+       // TON payout logic would go here
+       throw new Error("TON withdrawals not yet enabled.");
     }
 
     // 2. Record Transaction
@@ -270,28 +164,50 @@ app.post('/api/withdraw', async (req, res) => {
       userId: user.id,
       type: 'WITHDRAWAL',
       amount: amount,
-      currency: 'USD',
+      currency: isPix ? 'BRL' : 'TON',
       method: method,
-      status: 'COMPLETED', // Or PENDING if manual
+      status: 'COMPLETED',
       timestamp: Date.now(),
-      details: txDetails
+      details: `TX ID: ${apiResult.txid}`
     };
-
     db.transactions.unshift(tx);
     saveDb(db);
 
-    res.json({ success: true, transaction: tx, newBalance: user.balance });
+    res.json({ success: true, transaction: tx, newBalance: isPix ? user.balance : user.tonBalance });
 
   } catch (error: any) {
     // Refund if API fails
-    user.balance += amount; 
+    if (isPix) user.balance += amount; 
+    else user.tonBalance += amount;
     saveDb(db);
     res.status(500).json({ error: error.message });
   }
 });
 
+// --- PLACEHOLDER ENDPOINTS FOR KLOVER 2.0 ---
+app.get('/api/missions', (req, res) => {
+    // In a real app, this would be dynamic based on user progress
+    res.json({ daily: [], weekly: [] });
+});
+
+app.get('/api/ranking', (req, res) => {
+    const db = loadDb();
+    const rankedUsers = Object.values(db.users)
+        .sort((a, b) => (b.level - a.level) || (b.xp - a.xp))
+        .slice(0, 50)
+        .map((u, i) => ({
+            rank: i + 1,
+            userId: u.id,
+            username: u.username,
+            photoUrl: u.photoUrl,
+            level: u.level,
+            xp: u.xp,
+        }));
+    res.json(rankedUsers);
+});
+
+
 app.listen(PORT, () => {
-  console.log(`KLOVER Persistent Backend running on port ${PORT}`);
+  console.log(`KLOVER 2.0 Backend running on port ${PORT}`);
   console.log(`Database file: ${DB_FILE}`);
-  console.log(`FaucetPay API Key Loaded: ${FAUCETPAY_API_KEY !== "YOUR_FAUCETPAY_API_KEY_HERE"}`);
 });

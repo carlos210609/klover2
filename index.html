@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>KLOVER | Premium Earning</title>
+    <title>KLOVER 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
-    <!-- Telegram WebApp Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Telega.io Ads SDK -->
+    <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
     
     <script>
       tailwind.config = {
@@ -18,150 +20,63 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
-              mono: ['Space Grotesk', 'monospace'],
-              tech: ['Share Tech Mono', 'monospace'],
+              display: ['Orbitron', 'sans-serif'],
             },
             colors: {
-              black: '#000000',
-              white: '#FFFFFF',
-              glass: 'rgba(255, 255, 255, 0.05)',
-              'glass-hover': 'rgba(255, 255, 255, 0.1)',
-              'deep-bg': '#020617', // Slate 950
-              'neon-blue': '#3b82f6',
-              'neon-purple': '#a855f7',
-              'neon-green': '#22c55e',
-              'neon-gold': '#fbbf24',
-              'cyber-cyan': '#06b6d4',
+              'k-black': '#050509',
+              'k-bg': '#0D0D12',
+              'k-surface': '#14141B',
+              'k-border': 'rgba(255, 255, 255, 0.08)',
+              'k-border-hover': 'rgba(255, 255, 255, 0.2)',
+              'k-text-primary': '#F0F0F5',
+              'k-text-secondary': '#A0A0B0',
+              'k-text-tertiary': '#606070',
+              'k-accent': '#00A8FF', // A bright, clean neon blue
+              'k-accent-glow': 'rgba(0, 168, 255, 0.25)',
+              'k-green': '#00FFA3',
+              'k-purple': '#B400FF',
+              'k-gold': '#FFD700',
+              'k-divine': '#FFFFFF',
             },
             animation: {
-              'float': 'float 6s ease-in-out infinite',
-              'float-slow': 'float 10s ease-in-out infinite',
-              'spin-slow': 'spin 8s linear infinite',
-              'spin-reverse': 'spinReverse 12s linear infinite',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'fade-in-scale': 'fadeInScale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'slide-up-fade': 'slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'shimmer': 'shimmer 2s linear infinite',
-              'victory-pop': 'victoryPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-              'flash': 'flash 0.5s ease-in-out',
-              'roll-in-left': 'rollInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-              'roll-in-right': 'rollInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-              'zoom-bounce': 'zoomBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
-              'zoom-rotate': 'zoomRotate 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
-              'roll-reveal': 'rollReveal 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-              'swing-drop': 'swingDrop 1.2s ease-out forwards',
-              'elastic-rubber': 'elasticRubber 2s ease-in-out infinite',
-              'tumble': 'tumble 8s linear infinite',
-              'jelly': 'jelly 0.9s both',
-              'rubber-band': 'rubberBand 1s both',
-              'wobble': 'wobble 1s ease-in-out infinite',
-              'pop-in': 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-              'glitch': 'glitch 1s linear infinite',
-              'scan': 'scan 4s linear infinite',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'pop-in': 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'slide-up': 'slideUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'slow-spin': 'spin 10s linear infinite',
+              'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+              'shimmer': 'shimmer 2.5s linear infinite',
+              'gradient-pan': 'gradientPan 15s ease infinite',
             },
             keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              },
-              spinReverse: {
-                '0%': { transform: 'rotate(0deg)' },
-                '100%': { transform: 'rotate(-360deg)' },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
               },
               fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(30px) scale(0.98)' },
+                '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
                 '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
               },
-              fadeInScale: {
-                '0%': { opacity: '0', transform: 'scale(0.95)' },
+              popIn: {
+                '0%': { opacity: '0', transform: 'scale(0.8)' },
                 '100%': { opacity: '1', transform: 'scale(1)' },
               },
-              slideUpFade: {
-                '0%': { opacity: '0', transform: 'translateY(40px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
+              slideUp: {
+                 '0%': { transform: 'translateY(100%)' },
+                 '100%': { transform: 'translateY(0)' },
+              },
+              pulseGlow: {
+                '0%, 100%': { boxShadow: '0 0 20px var(--glow-color), 0 0 30px var(--glow-color)' },
+                '50%': { boxShadow: '0 0 30px var(--glow-color), 0 0 50px var(--glow-color)' },
               },
               shimmer: {
-                '0%': { transform: 'translateX(-100%)' },
-                '100%': { transform: 'translateX(100%)' },
+                '0%': { transform: 'translateX(-100%) skewX(-15deg)' },
+                '100%': { transform: 'translateX(100%) skewX(-15deg)' },
               },
-              victoryPop: {
-                '0%': { opacity: '0', transform: 'scale(0.5) rotate(-45deg)' },
-                '70%': { transform: 'scale(1.2) rotate(10deg)' },
-                '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' },
-              },
-              flash: {
-                '0%, 100%': { opacity: '1' },
-                '50%': { opacity: '0.5' },
-              },
-              rollInLeft: {
-                '0%': { opacity: '0', transform: 'translateX(-100%) rotate(-120deg)' },
-                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg)' },
-              },
-              rollInRight: {
-                '0%': { opacity: '0', transform: 'translateX(100%) rotate(120deg)' },
-                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg)' },
-              },
-              zoomBounce: {
-                '0%': { opacity: '0', transform: 'scale(0.3)' },
-                '50%': { opacity: '1', transform: 'scale(1.1)' },
-                '70%': { transform: 'scale(0.9)' },
-                '100%': { transform: 'scale(1)' },
-              },
-              zoomRotate: {
-                '0%': { opacity: '0', transform: 'scale(0) rotate(-360deg)' },
-                '80%': { transform: 'scale(1.1) rotate(10deg)' },
-                '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' },
-              },
-              rollReveal: {
-                '0%': { opacity: '0', transform: 'translateX(-100%) rotate(-180deg) scale(0.5)' },
-                '100%': { opacity: '1', transform: 'translateX(0) rotate(0deg) scale(1)' },
-              },
-              swingDrop: {
-                '0%': { opacity: '0', transform: 'translateY(-100%) rotate(20deg)' },
-                '60%': { transform: 'rotate(-10deg)' },
-                '80%': { transform: 'rotate(5deg)' },
-                '100%': { opacity: '1', transform: 'translateY(0) rotate(0deg)' },
-              },
-              elasticRubber: {
-                '0%, 100%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.05, 0.95)' },
-              },
-              tumble: {
-                '0%': { transform: 'translateY(-10px) rotate(0deg)' },
-                '50%': { transform: 'translateY(10px) rotate(180deg)' },
-                '100%': { transform: 'translateY(-10px) rotate(360deg)' },
-              },
-              jelly: {
-                '0%, 100%': { transform: 'scale3d(1, 1, 1)' },
-                '30%': { transform: 'scale3d(1.25, 0.75, 1)' },
-                '40%': { transform: 'scale3d(0.75, 1.25, 1)' },
-                '50%': { transform: 'scale3d(1.15, 0.85, 1)' },
-                '65%': { transform: 'scale3d(0.95, 1.05, 1)' },
-                '75%': { transform: 'scale3d(1.05, 0.95, 1)' },
-              },
-              rubberBand: {
-                '0%': { transform: 'scale3d(1, 1, 1)' },
-                '30%': { transform: 'scale3d(1.25, 0.75, 1)' },
-                '40%': { transform: 'scale3d(0.75, 1.25, 1)' },
-                '50%': { transform: 'scale3d(1.15, 0.85, 1)' },
-                '65%': { transform: 'scale3d(0.95, 1.05, 1)' },
-                '75%': { transform: 'scale3d(1.05, 0.95, 1)' },
-                '100%': { transform: 'scale3d(1, 1, 1)' },
-              },
-              wobble: {
-                '0%, 100%': { transform: 'rotate(0deg)' },
-                '25%': { transform: 'rotate(-3deg)' },
-                '75%': { transform: 'rotate(3deg)' },
-              },
-              popIn: {
-                '0%': { opacity: '0', transform: 'scale(0)' },
-                '80%': { transform: 'scale(1.1)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              },
-              scan: {
-                '0%': { backgroundPosition: '0 0' },
-                '100%': { backgroundPosition: '0 100%' },
+              gradientPan: {
+                '0%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' },
+                '100%': { backgroundPosition: '0% 50%' },
               }
             },
           },
@@ -169,75 +84,23 @@
       }
     </script>
     <style>
+      :root {
+        --k-bg: #0D0D12;
+        --k-text-primary: #F0F0F5;
+      }
       body {
-        background-color: #020617; /* Fallback color */
-        color: #ffffff;
-        overflow: hidden; /* Prevent body scroll for fixed mobile layout */
+        background-color: var(--k-bg);
+        color: var(--k-text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
         -webkit-tap-highlight-color: transparent;
       }
-      /* SCANLINES OVERLAY */
-      .scanlines {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          to bottom,
-          rgba(255,255,255,0),
-          rgba(255,255,255,0) 50%,
-          rgba(0,0,0,0.1) 50%,
-          rgba(0,0,0,0.1)
-        );
-        background-size: 100% 4px;
-        z-index: 9999;
-        pointer-events: none;
-        opacity: 0.3;
+      .font-display {
+        font-family: 'Orbitron', sans-serif;
       }
-      .vignette {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.6) 100%);
-        z-index: 9998;
-        pointer-events: none;
-      }
-      
-      /* Custom Scrollbar hidden for mobile feel */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      ::-webkit-scrollbar {
-        width: 4px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #020617;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #334155;
-        border-radius: 2px;
-      }
-      .perspective-1000 {
-        perspective: 1000px;
-      }
-      .perspective-2000 {
-        perspective: 2000px;
-      }
-      .preserve-3d {
-        transform-style: preserve-3d;
-      }
-      .backface-hidden {
-        backface-visibility: hidden;
-      }
-      .rotate-y-180 {
-        transform: rotateY(180deg);
-      }
+      /* Hide scrollbar */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
   <script type="importmap">
 {
@@ -258,7 +121,13 @@
 </script>
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+       <!-- Initial Loading Screen -->
+       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #0D0D12; color: #F0F0F5; font-family: 'Orbitron', sans-serif; transition: opacity 0.5s ease-out;">
+         <div style="width: 48px; height: 48px; border: 3px solid rgba(0, 168, 255, 0.2); border-top-color: #00A8FF; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+         <p style="margin-top: 1.5rem; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.6;">SYSTEM ONLINE</p>
+       </div>
+    </div>
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>

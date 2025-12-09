@@ -1,27 +1,26 @@
 
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Earn from './pages/Earn';
 import Wallet from './pages/Wallet';
 import History from './pages/History';
 import Login from './pages/Login';
-import Shop from './pages/Shop';
+import Missions from './pages/Missions';
+import Ranking from './pages/Ranking';
 import { backendService } from './services/mockBackend';
 import { TRANSLATIONS } from './constants';
-import { Language } from './types';
+import { Language, User } from './types';
 
 // --- LANGUAGE CONTEXT ---
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof TRANSLATIONS.en) => string;
+  t: (key: keyof typeof TRANSLATIONS.pt) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'en',
+  language: 'pt',
   setLanguage: () => {},
   t: (key) => key,
 });
@@ -29,17 +28,10 @@ const LanguageContext = createContext<LanguageContextType>({
 export const useLanguage = () => useContext(LanguageContext);
 
 const LanguageProvider = ({ children }: { children?: React.ReactNode }) => {
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem('klover_lang');
-    return (saved === 'ru' || saved === 'en') ? saved : 'en';
-  });
+  const [language, setLanguage] = useState<Language>('pt');
 
-  useEffect(() => {
-    localStorage.setItem('klover_lang', language);
-  }, [language]);
-
-  const t = (key: keyof typeof TRANSLATIONS.en) => {
-    return TRANSLATIONS[language][key] || key;
+  const t = (key: keyof typeof TRANSLATIONS.pt): string => {
+    return TRANSLATIONS[language]?.[key] || TRANSLATIONS.en[key] || key;
   };
 
   return (
@@ -50,89 +42,55 @@ const LanguageProvider = ({ children }: { children?: React.ReactNode }) => {
 };
 
 // --- AUTH GUARD ---
-const RequireAuth = ({ children }: { children?: React.ReactNode }) => {
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const check = backendService.isAuthenticated();
-    setIsAuth(check);
-  }, []);
-
-  if (isAuth === null) return null; // Loading state
-
-  if (!isAuth) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  return backendService.isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// --- PROFILE COMPONENT ---
+// --- PROFILE PAGE ---
 const Profile = () => {
-  const [user, setUser] = React.useState<any>(null);
-  const { t, setLanguage, language } = useLanguage();
+  const [user, setUser] = useState<User | null>(null);
+  const { t } = useLanguage();
   
-  React.useEffect(() => {
-    backendService.getUser().then(setUser).catch(() => {});
+  useEffect(() => {
+    backendService.getUser().then(setUser);
   }, []);
 
   if (!user) return null;
 
   return (
-    <div className="pt-10 px-4 text-center animate-fade-in-up">
-      <h2 className="text-xl font-mono mb-4 text-white">{t('profile_settings')}</h2>
+    <div className="space-y-6">
+       <h1 className="text-2xl font-bold font-display text-k-text-primary">{t('profile_settings')}</h1>
       
-      {/* Lang Toggle */}
-      <div className="flex justify-center mb-6">
-        <div className="bg-white/5 border border-white/10 p-1 rounded-lg flex">
-           <button 
-             onClick={() => setLanguage('en')}
-             className={`px-3 py-1 text-xs font-mono rounded ${language === 'en' ? 'bg-white text-black' : 'text-white/50'}`}
-           >
-             ENGLISH
-           </button>
-           <button 
-             onClick={() => setLanguage('ru')}
-             className={`px-3 py-1 text-xs font-mono rounded ${language === 'ru' ? 'bg-white text-black' : 'text-white/50'}`}
-           >
-             РУССКИЙ
-           </button>
-        </div>
-      </div>
-
-      <div className="p-4 border border-white/10 rounded-xl bg-slate-900/50 backdrop-blur-sm">
-        <div className="w-16 h-16 rounded-full mx-auto mb-4 border border-white/20 overflow-hidden ring-2 ring-purple-500/20">
-          <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
-        </div>
-        <p className="text-sm font-bold text-white mb-1">
-           {user.email.startsWith('tg_') ? user.firstName : user.email}
+      <div className="bg-k-surface border border-k-border rounded-xl p-6 text-center">
+        <img src={user.photoUrl} alt="Avatar" className="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-k-accent shadow-[0_0_15px_var(--k-accent-glow)]" />
+        <p className="text-lg font-bold text-k-text-primary mb-1">
+           {user.firstName}
         </p>
-        <p className="text-xs text-white/50 mb-4">UID: {user.id}</p>
+        <p className="text-sm text-k-text-secondary mb-4">@{user.username}</p>
         
-        {user.username && (
-           <p className="text-xs text-cyan-400 mb-4 font-mono">@{user.username}</p>
-        )}
-
-        <div className="grid grid-cols-2 gap-2 mb-6">
-           <div className="bg-black/30 p-2 rounded border border-white/5">
-             <p className="text-[10px] text-white/40">{t('spins_avail')}</p>
-             <p className="font-mono text-cyan-400">{user.spins}</p>
-           </div>
-           <div className="bg-black/30 p-2 rounded border border-white/5">
-             <p className="text-[10px] text-white/40">{t('loyalty_pts')}</p>
-             <p className="font-mono text-purple-400">{user.points}</p>
-           </div>
-        </div>
-
-        <div className="mt-6 border-t border-white/5 pt-4">
-            <button className="text-xs text-red-400 border border-red-500/20 bg-red-500/5 px-4 py-2 rounded-lg hover:bg-red-500/10 transition-colors uppercase tracking-wider" onClick={() => {
-              backendService.logout();
-              window.location.reload();
-            }}>
-              {t('disconnect')}
-            </button>
+        <div className="text-xs text-k-text-tertiary font-mono bg-k-bg p-2 rounded-md border border-k-border">
+            {t('user_id')}: {user.id}
         </div>
       </div>
+
+       <div className="grid grid-cols-2 gap-4">
+           <div className="bg-k-surface p-4 rounded-xl border border-k-border text-center">
+             <p className="text-xs text-k-text-secondary">{t('level')}</p>
+             <p className="font-display text-2xl font-bold text-k-accent">{user.level}</p>
+           </div>
+           <div className="bg-k-surface p-4 rounded-xl border border-k-border text-center">
+             <p className="text-xs text-k-text-secondary">{t('status')}</p>
+             <p className="font-display text-2xl font-bold text-k-green">{user.status}</p>
+           </div>
+        </div>
+
+      <button className="w-full text-center py-4 text-sm text-red-400 bg-red-500/10 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors" onClick={() => {
+        backendService.logout();
+        window.location.hash = '/login';
+        window.location.reload();
+      }}>
+        {t('disconnect')}
+      </button>
     </div>
   );
 };
@@ -144,32 +102,27 @@ const AppContent = () => {
 
   useEffect(() => {
     const initApp = async () => {
-      // 1. Check if running inside Telegram
       if (window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
-        if (tg.platform !== 'unknown') {
-            tg.ready();
-            tg.expand();
-            try {
-                tg.setHeaderColor('#1e1b4b'); 
-                tg.setBackgroundColor('#020617');
-            } catch (e) {}
-        }
+        tg.ready();
+        tg.expand();
+        try {
+            tg.setHeaderColor('#0D0D12'); 
+            tg.setBackgroundColor('#0D0D12');
+        } catch (e) {}
 
         if (tg.initDataUnsafe?.user) {
           try {
-            // Check start_param for referral
-            const startParam = tg.initDataUnsafe.start_param;
-            await backendService.loginWithTelegram(tg.initDataUnsafe, startParam);
+            await backendService.loginWithTelegram(tg.initDataUnsafe, tg.initDataUnsafe.start_param);
             setIsInitializing(false);
-            return; 
+            navigate('/');
+            return;
           } catch (e) {
             console.error("TG Login error", e);
           }
         }
       }
 
-      // 3. If Web (or TG login failed), check existing session
       if (!backendService.isAuthenticated()) {
         navigate('/login');
       }
@@ -177,15 +130,14 @@ const AppContent = () => {
     };
 
     initApp();
-  }, [navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isInitializing) {
+     // This loader will be replaced by the one in index.html, but serves as a fallback.
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-transparent">
-        <div className="text-center">
-            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-[10px] font-mono text-white/50 animate-pulse">ESTABLISHING SECURE CONNECTION...</p>
-        </div>
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-k-border border-t-k-accent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -194,10 +146,9 @@ const AppContent = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
-      <Route path="/earn" element={<RequireAuth><Earn /></RequireAuth>} />
-      <Route path="/shop" element={<RequireAuth><Shop /></RequireAuth>} />
+      <Route path="/missions" element={<RequireAuth><Missions /></RequireAuth>} />
       <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
-      <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
+      <Route path="/ranking" element={<RequireAuth><Ranking /></RequireAuth>} />
       <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

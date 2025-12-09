@@ -5,29 +5,73 @@ export interface User {
   email: string;
   firstName?: string;
   photoUrl?: string;
-  balance: number;
-  spins: number; 
-  points: number; 
-  totalEarnings: number;
-  joinDate: string;
+  
+  // Klover 2.0 Economy
+  balance: number; // Main currency (BRL)
+  tonBalance: number;
+  xp: number;
+  level: number;
+  
+  // Klover 2.0 Rewards
+  chests: Chest[];
+  activeBoosters: Booster[];
+  dailyStreak: number;
+  lastLogin: string;
+
   // Referral System
-  referredBy?: string; // ID of the user who invited this user
-  referralEarnings: number; // Amount earned from inviting others
+  referredBy?: string;
+  referralEarnings: number;
+
+  // Metadata
+  joinDate: string;
+  status: 'ACTIVE' | 'FLAGGED' | 'BANNED';
 }
 
-export type Language = 'en' | 'ru';
+export type Language = 'en' | 'pt';
+
+// --- REWARD SYSTEM ---
+
+export type ChestRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'DIVINE' | 'ULTRA_DIVINE';
+
+export interface Chest {
+  id: string;
+  rarity: ChestRarity;
+  acquiredAt: number;
+}
+
+export interface Mission {
+  id: string;
+  type: 'DAILY' | 'WEEKLY';
+  title: string;
+  description: string;
+  goal: number;
+  progress: number;
+  reward: { type: 'XP' | 'CHEST', value: number | ChestRarity };
+  isComplete: boolean;
+}
+
+export interface Booster {
+  id: '2X_REWARDS' | 'XP_BOOSTER' | 'RARE_DROP_BOOSTER';
+  name: string;
+  description: string;
+  durationSeconds: number;
+  expiresAt: number;
+}
+
+// --- TRANSACTIONS ---
 
 export enum TransactionType {
-  EARN = 'EARN',
+  AD_REWARD = 'AD_REWARD',
+  CHEST_REWARD = 'CHEST_REWARD',
+  MISSION_REWARD = 'MISSION_REWARD',
+  BOOSTER_PURCHASE = 'BOOSTER_PURCHASE',
   WITHDRAWAL = 'WITHDRAWAL',
-  SHOP_PURCHASE = 'SHOP_PURCHASE',
   REFERRAL = 'REFERRAL',
-  CONVERSION = 'CONVERSION'
 }
 
 export enum WithdrawalMethod {
-  CWALLET = 'CWALLET',
-  FAUCETPAY = 'FAUCETPAY',
+  PIX = 'PIX',
+  TON = 'TON',
 }
 
 export enum TransactionStatus {
@@ -39,30 +83,26 @@ export enum TransactionStatus {
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: number; // Amount or Points
-  currency?: 'USD' | 'PTS';
+  amount: number;
+  currency: 'BRL' | 'TON' | 'XP';
   method?: WithdrawalMethod;
   status: TransactionStatus;
   timestamp: number;
   details?: string;
 }
 
-export type ItemRarity = 'COMMON' | 'RARE' | 'LEGENDARY';
-
-export interface ShopItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  currency: 'USD' | 'PTS';
-  icon: string;
-  rarity: ItemRarity;
+// --- RANKING ---
+export interface RankEntry {
+  rank: number;
+  userId: string | number;
+  username: string;
+  photoUrl: string;
+  level: number;
+  xp: number;
 }
 
-export interface AdConfig {
-  zoneId: string;
-  sdkName: string;
-}
+
+// --- TELEGRAM ---
 
 export interface TelegramWebApp {
   ready: () => void;
@@ -83,15 +123,14 @@ export interface TelegramWebApp {
   platform: string;
 }
 
-export interface AdsgramShowResult {
-  done: boolean;
-  description: string;
-  state: 'load' | 'render' | 'playing' | 'destroy';
-  error: boolean;
+// --- TELEGA ADS SDK ---
+export interface TelegaAdShowResult {
+    // Define properties based on SDK documentation if available
+    success: boolean; 
 }
 
-export interface AdsgramController {
-  show: () => Promise<AdsgramShowResult>;
+export interface TelegaAdsController {
+    ad_show(params: { adBlockUuid: string }): Promise<TelegaAdShowResult>;
 }
 
 declare global {
@@ -99,8 +138,10 @@ declare global {
     Telegram: {
       WebApp: TelegramWebApp;
     };
-    Adsgram?: {
-      init: (config: { blockId: string; debug?: boolean }) => AdsgramController;
+    TelegaIn?: {
+      AdsController: {
+        create_miniapp(config: { token: string }): TelegaAdsController;
+      }
     };
   }
 }

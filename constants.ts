@@ -1,211 +1,113 @@
 
-import { ShopItem } from './types';
+import { ChestRarity, Mission } from './types';
 
 export const APP_NAME = "KLOVER";
 export const APP_VERSION = "2.0.0";
 
-// Ad Configuration (Adsgram)
-export const AD_ZONE_ID = "18871";
-export const REWARD_PER_AD = 0.001; // $0.001 USD
-export const REFERRAL_RATE = 0.30; // 30% Commission
+// Ad Configuration (Telega.io)
+export const TELEGA_TOKEN = "165a86f6-e5b4-482f-9e05-dac8e12daa56";
+export const REWARDED_AD_BLOCK_ID = "c953f2cc-2fc2-4bc1-9400-5ab3ed480e2c";
 
-// API Endpoints
+// --- KLOVER OMEGA SYSTEM ---
+
+// 1. User Levels & XP
+export const LEVELS = Array.from({ length: 100 }, (_, i) => ({
+  level: i + 1,
+  xpRequired: Math.floor(100 * Math.pow(1.15, i)),
+  name: `Rank ${i+1}` // Simple naming, can be expanded (Bronze, Silver etc)
+}));
+
+// 2. Base Rewards
+export const BASE_AD_REWARD_XP = 10;
+export const REFERRAL_RATE = 0.15; // 15% Commission
+
+// 3. Chest Definitions
+export const CHEST_DEFINITIONS: Record<ChestRarity, { name: string, color: string, probability: number, rewards: any[] }> = {
+  COMMON:       { name: "Baú Comum",    color: "#A0A0B0", probability: 0.65, rewards: [{ type: 'BRL', min: 0.01, max: 0.05 }] },
+  RARE:         { name: "Baú Raro",      color: "#00A8FF", probability: 0.25, rewards: [{ type: 'BRL', min: 0.05, max: 0.15 }] },
+  EPIC:         { name: "Baú Épico",     color: "#B400FF", probability: 0.07, rewards: [{ type: 'BRL', min: 0.20, max: 0.50 }] },
+  LEGENDARY:    { name: "Baú Lendário",  color: "#FFD700", probability: 0.02, rewards: [{ type: 'BRL', min: 0.50, max: 2.00 }] },
+  DIVINE:       { name: "Baú Divino",    color: "#FFFFFF", probability: 0.009,rewards: [{ type: 'BRL', min: 2.50, max: 10.00 }] },
+  ULTRA_DIVINE: { name: "Baú Ultra Divino", color: "linear-gradient(to right, #00A8FF, #B400FF, #FFD700)", probability: 0.001, rewards: [{ type: 'BRL', min: 10.00, max: 50.00 }] },
+};
+
+// 4. Missions (Example definitions)
+export const DAILY_MISSIONS: Omit<Mission, 'progress' | 'isComplete'>[] = [
+  { id: 'daily_watch_5', type: 'DAILY', title: "Assista 5 Anúncios", description: "Complete 5 streams de anúncio.", goal: 5, reward: { type: 'XP', value: 50 } },
+  { id: 'daily_watch_10', type: 'DAILY', title: "Assista 10 Anúncios", description: "Complete 10 streams de anúncio.", goal: 10, reward: { type: 'CHEST', value: 'RARE' } },
+];
+export const WEEKLY_MISSIONS: Omit<Mission, 'progress' | 'isComplete'>[] = [
+  { id: 'weekly_watch_50', type: 'WEEKLY', title: "Assista 50 Anúncios", description: "Complete 50 streams durante a semana.", goal: 50, reward: { type: 'CHEST', value: 'EPIC' } },
+];
+
+
+// --- API & ROUTES ---
 export const API_URL = "https://api.klover.app/v1"; 
 
 export const ROUTES = {
   HOME: "/",
-  EARN: "/earn",
+  MISSIONS: "/missions",
   WALLET: "/wallet",
-  HISTORY: "/history",
+  RANKING: "/ranking",
   PROFILE: "/profile",
-  SHOP: "/shop",
 };
 
 export const MIN_WITHDRAWAL = {
-  CWALLET: 0.10, // $0.10 USD
-  FAUCETPAY: 0.01 // $0.01 USD
+  PIX: 5.00, // R$5.00
+  TON: 1.0 // 1 TON
 };
 
-export const ROULETTE_PRIZES = [
-  { id: 'common_cash', type: 'CASH', value: 0.001, label: '$0.001', weight: 40, color: '#00A8FF' }, // Neon Blue
-  { id: 'common_points', type: 'POINTS', value: 10, label: '10 PTS', weight: 30, color: '#B400FF' }, // Neon Purple
-  { id: 'rare_cash', type: 'CASH', value: 0.005, label: '$0.005', weight: 15, color: '#22c55e' }, // Green
-  { id: 'rare_points', type: 'POINTS', value: 50, label: '50 PTS', weight: 10, color: '#fbbf24' }, // Gold
-  { id: 'jackpot', type: 'CASH', value: 0.05, label: '$0.05', weight: 5, color: '#ef4444' }   // Red (Jackpot)
-];
 
-export const SHOP_ITEMS: ShopItem[] = [
-  {
-    id: 'buy_spin_5',
-    name: 'Pack of 5 Spins',
-    description: 'Get 5 more chances to hit the Jackpot.',
-    price: 150,
-    currency: 'PTS',
-    icon: 'refresh',
-    rarity: 'COMMON'
-  },
-  {
-    id: 'cash_conversion_1',
-    name: 'Cash Ticket ($0.01)',
-    description: 'Instantly convert points to withdrawable balance.',
-    price: 500,
-    currency: 'PTS',
-    icon: 'cash',
-    rarity: 'COMMON'
-  },
-  {
-    id: 'nano_miner',
-    name: 'Nano Miner v1',
-    description: 'Cloud mining simulation: Instantly yields $0.05.',
-    price: 2000,
-    currency: 'PTS',
-    icon: 'zap',
-    rarity: 'RARE'
-  },
-  {
-    id: 'golden_ticket',
-    name: 'Golden Ticket',
-    description: 'A legendary ticket that grants 25 Spins instantly.',
-    price: 1000,
-    currency: 'PTS',
-    icon: 'star',
-    rarity: 'LEGENDARY'
-  }
-];
-
+// --- TRANSLATIONS ---
 export const TRANSLATIONS = {
   en: {
     nav_home: "Home",
-    nav_earn: "Earn",
+    nav_missions: "Missions",
     nav_wallet: "Wallet",
-    nav_shop: "Shop",
-    nav_hist: "Hist",
-    connected_as: "Connected as",
-    premium: "PREMIUM",
-    total_balance: "Total Balance",
-    start_earning: "Start Earning",
-    spins_avail: "Spins Available",
-    loyalty_pts: "Loyalty Points",
-    quick_actions: "Quick Actions",
-    shop_link: "Spend Points in Shop",
-    open: "OPEN",
-    referral_prog: "Referral Program",
-    invite_earn: "Invite & Earn 30%",
-    your_link: "Your Invite Link",
-    total_comm: "Total Commission",
-    copy: "COPY",
-    copied: "COPIED",
-    reactor_core: "Reactor Core",
-    init_seq: "INITIATE SEQUENCE",
-    stabilizing: "STABILIZING...",
-    activate: "ACTIVATE",
-    core_depleted: "Core Depleted",
-    recharge_core: "Recharge Core",
-    watch_ad: "Watch ad stream • +1 Charge",
-    output_pot: "Output Potential",
-    result: "Result",
-    withdraw_funds: "Withdraw Funds",
-    avail_bal: "Available Balance",
-    method_cwallet: "CWALLET",
-    method_faucetpay: "FAUCETPAY",
-    label_cwallet: "CWallet Email / ID",
-    label_faucetpay: "FaucetPay Address",
-    label_amount: "Amount (USD)",
-    min_withdraw: "Min",
-    process_tx: "PROCESSING TRANSACTION...",
-    confirm_withdraw: "CONFIRM WITHDRAWAL",
-    secure_tx: "Secure Encrypted Transaction",
-    success_withdraw: "Withdrawal request sent successfully!",
-    error_min: "Minimum withdrawal is",
-    black_market: "Black Market",
-    shop_desc: "Exchange loyalty for upgrades.",
-    balance: "Balance",
-    cost: "Cost",
-    acquire: "ACQUIRE",
-    acquired: "Acquired",
-    insufficient_pts: "Insufficient Points",
-    history: "History",
-    no_tx: "No transactions yet.",
-    ad_reward: "Ad Reward",
-    withdraw_to: "Withdraw to",
-    lucky_spin: "Lucky Spin Reward",
-    shop_buy: "Shop Purchase",
-    referral_comm: "Referral Commission",
-    identity_uplink: "Identity Uplink",
-    login_desc: "Enter your FaucetPay email to connect.",
-    email_label: "FaucetPay Email",
-    ref_code_label: "Referral Code (Optional)",
-    init_session: "INITIALIZE SESSION",
-    establishing: "ESTABLISHING CONNECTION...",
-    no_pass: "No Password Required",
-    profile_settings: "Profile Settings",
-    disconnect: "Disconnect Session"
+    nav_ranking: "Ranking",
+    nav_profile: "Profile",
+    // Add more translations as needed...
   },
-  ru: {
-    nav_home: "Главная",
-    nav_earn: "Заработок",
-    nav_wallet: "Кошелек",
-    nav_shop: "Магазин",
-    nav_hist: "История",
-    connected_as: "Вы вошли как",
-    premium: "ПРЕМИУМ",
-    total_balance: "Общий баланс",
-    start_earning: "Начать заработок",
-    spins_avail: "Доступно спинов",
-    loyalty_pts: "Очки лояльности",
-    quick_actions: "Быстрые действия",
-    shop_link: "Потратить очки в магазине",
-    open: "ОТКРЫТЬ",
-    referral_prog: "Реферальная программа",
-    invite_earn: "Пригласи и получи 30%",
-    your_link: "Ваша ссылка",
-    total_comm: "Комиссия",
-    copy: "КОПИРОВАТЬ",
-    copied: "СКОПИРОВАНО",
-    reactor_core: "Ядро Реактора",
-    init_seq: "ИНИЦИАЛИЗАЦИЯ",
-    stabilizing: "СТАБИЛИЗАЦИЯ...",
-    activate: "АКТИВИРОВАТЬ",
-    core_depleted: "Ядро истощено",
-    recharge_core: "Зарядить ядро",
-    watch_ad: "Смотреть рекламу • +1 Заряд",
-    output_pot: "Потенциал выхода",
-    result: "Результат",
-    withdraw_funds: "Вывод средств",
-    avail_bal: "Доступный баланс",
-    method_cwallet: "CWALLET",
-    method_faucetpay: "FAUCETPAY",
-    label_cwallet: "Email / ID CWallet",
-    label_faucetpay: "Адрес FaucetPay",
-    label_amount: "Сумма (USD)",
-    min_withdraw: "Мин",
-    process_tx: "ОБРАБОТКА ТРАНЗАКЦИИ...",
-    confirm_withdraw: "ПОДТВЕРДИТЬ ВЫВОД",
-    secure_tx: "Защищенная транзакция",
-    success_withdraw: "Запрос на вывод отправлен!",
-    error_min: "Минимальный вывод",
-    black_market: "Черный Рынок",
-    shop_desc: "Обмен лояльности на улучшения.",
-    balance: "Баланс",
-    cost: "Цена",
-    acquire: "КУПИТЬ",
-    acquired: "Приобретено",
-    insufficient_pts: "Недостаточно очков",
-    history: "История",
-    no_tx: "Транзакций пока нет.",
-    ad_reward: "Награда за рекламу",
-    withdraw_to: "Вывод на",
-    lucky_spin: "Награда рулетки",
-    shop_buy: "Покупка в магазине",
-    referral_comm: "Реферальная комиссия",
-    identity_uplink: "Идентификация",
-    login_desc: "Введите FaucetPay email для входа.",
-    email_label: "FaucetPay Email",
-    ref_code_label: "Код приглашения (Опционально)",
-    init_session: "НАЧАТЬ СЕССИЮ",
-    establishing: "УСТАНОВЛЕНИЕ СОЕДИНЕНИЯ...",
-    no_pass: "Пароль не требуется",
-    profile_settings: "Настройки профиля",
-    disconnect: "Завершить сессию"
+  pt: {
+    nav_home: "Início",
+    nav_missions: "Missões",
+    nav_wallet: "Carteira",
+    nav_ranking: "Ranking",
+    nav_profile: "Perfil",
+    
+    // Home
+    total_balance: "Saldo Total",
+    level: "Nível",
+    daily_missions: "Missões Diárias",
+    watch_and_earn: "ASSISTIR E GANHAR",
+    watching_ad: "CARREGANDO STREAM...",
+    
+    // Wallet
+    withdraw_funds: "Sacar Fundos",
+    withdraw_method: "Método de Saque",
+    pix_key: "Chave PIX",
+    ton_address: "Endereço TON",
+    amount_brl: "Valor (BRL)",
+    amount_ton: "Valor (TON)",
+    confirm_withdrawal: "CONFIRMAR SAQUE",
+    processing: "PROCESSANDO...",
+    min_withdrawal: "Mínimo",
+    
+    // Missions
+    missions: "Missões",
+    daily: "Diárias",
+    weekly: "Semanais",
+    claim: "RESGATAR",
+    claimed: "RESGATADO",
+    
+    // Profile
+    profile_settings: "Configurações",
+    user_id: "ID de Usuário",
+    disconnect: "Desconectar",
+    
+    // General
+    status: "Status",
+    error: "Erro",
+    success: "Sucesso",
   }
 };
