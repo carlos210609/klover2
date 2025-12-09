@@ -77,6 +77,8 @@ export const TRANSLATIONS = {
     // Wallet
     total_balance: "Saldo Total",
     transaction_history: "Histórico de Transações",
+    market_info_live: "Informações de Mercado (Live)",
+    staking_apr: "Staking APR",
     
     // Markets
     market_trends: "Tendências de Mercado",

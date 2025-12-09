@@ -39,6 +39,44 @@ const Wallet = () => {
     const [assetInfo, setAssetInfo] = useState<CryptoAsset | null>(null);
     const [assetPortfolio, setAssetPortfolio] = useState<PortfolioAsset | null>(null);
     const [loading, setLoading] = useState(true);
+    
+    const [liveMarketData, setLiveMarketData] = useState<{ priceBRL: number | null, apr: number | null }>({ priceBRL: null, apr: null });
+    const [isLiveLoading, setIsLiveLoading] = useState(true);
+
+
+    useEffect(() => {
+        if (!assetInfo) return;
+
+        const fetchLiveMarketData = async () => {
+            setIsLiveLoading(true);
+            try {
+                // Fetch price from CoinGecko
+                const priceResponse = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${assetInfo.id}&vs_currencies=brl`);
+                const priceData = await priceResponse.json();
+                const priceBRL = priceData[assetInfo.id]?.brl || null;
+
+                // Fetch Staking APR from DefiLlama
+                const aprResponse = await fetch('https://api.llama.fi/yields');
+                const aprData = await aprResponse.json();
+                const assetPools = aprData.data.filter((pool: any) => pool.symbol?.toUpperCase() === assetInfo.symbol.toUpperCase() && pool.apy > 0);
+                
+                let apr: number | null = null;
+                if (assetPools.length > 0) {
+                    apr = Math.max(...assetPools.map((p: any) => p.apy));
+                }
+                
+                setLiveMarketData({ priceBRL, apr });
+
+            } catch (error) {
+                console.error("Failed to fetch live market data:", error);
+                setLiveMarketData({ priceBRL: null, apr: null });
+            } finally {
+                setIsLiveLoading(false);
+            }
+        };
+
+        fetchLiveMarketData();
+    }, [assetInfo]);
 
     const fetchData = useCallback(async () => {
         if (!assetId) return;
@@ -98,6 +136,29 @@ const Wallet = () => {
                 <button className="flex-1 h-12 rounded-lg font-bold bg-k-surface border border-k-border text-k-text-primary">{t('withdraw')}</button>
             </div>
 
+            <div className="bg-k-surface border border-k-border rounded-lg p-4 mb-6">
+                <h2 className="text-sm text-k-text-secondary mb-3 text-center">{t('market_info_live')}</h2>
+                {isLiveLoading ? (
+                    <div className="flex justify-center items-center h-12">
+                        <div className="w-6 h-6 border-2 border-k-border border-t-k-accent rounded-full animate-spin"></div>
+                    </div>
+                ) : (
+                    <div className="flex justify-around text-center">
+                        <div>
+                            <p className="text-xs text-k-text-tertiary">{t('price')}</p>
+                            <p className="font-mono font-bold text-k-text-primary text-lg">
+                                {liveMarketData.priceBRL ? `R$ ${liveMarketData.priceBRL.toFixed(2).replace('.', ',')}` : 'N/A'}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-k-text-tertiary">{t('staking_apr')}</p>
+                            <p className="font-mono font-bold text-k-green text-lg">
+                                {liveMarketData.apr ? `${liveMarketData.apr.toFixed(2)}%` : '—'}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             <h2 className="font-bold text-lg mb-2">{t('transaction_history')}</h2>
             {transactions.length > 0 ? (
