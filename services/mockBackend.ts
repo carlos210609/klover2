@@ -169,6 +169,43 @@ class BackendService {
       });
   }
 
+  async performDeposit(assetId: string, amount: number): Promise<boolean> {
+      return new Promise((resolve, reject) => {
+         setTimeout(() => {
+             if (!this.user) return reject(new Error("User not found"));
+
+             let asset = this.user.portfolio.find(a => a.assetId === assetId);
+             if (asset) {
+                 asset.amount += amount;
+             } else {
+                 this.user.portfolio.push({ assetId: assetId, amount: amount });
+             }
+
+             this.addTransaction(TransactionType.DEPOSIT, amount, assetId, { simulated: true });
+             this.saveToLocalStorage();
+             resolve(true);
+         }, FAKE_LATENCY);
+      });
+  }
+
+  async performWithdrawal(assetId: string, amount: number, address: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+       setTimeout(() => {
+           if (!this.user) return reject(new Error("User not found"));
+
+           const asset = this.user.portfolio.find(a => a.assetId === assetId);
+           if (!asset || asset.amount < amount) {
+               return reject(new Error("Insufficient balance"));
+           }
+
+           asset.amount -= amount;
+           this.addTransaction(TransactionType.WITHDRAWAL, amount, assetId, { address });
+           this.saveToLocalStorage();
+           resolve(true);
+       }, FAKE_LATENCY * 2);
+    });
+}
+
 
   // --- TRANSACTIONS ---
   async getTransactions(assetId?: string): Promise<Transaction[]> {

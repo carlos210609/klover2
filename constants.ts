@@ -98,10 +98,25 @@ export const TRANSLATIONS = {
     profile_settings: "Configurações",
     user_id: "ID de Usuário",
     disconnect: "Desconectar",
+
+    // Deposit Modal
+    deposit_to: "Depositar para",
+    your_address: "Seu endereço",
+    deposit_warning: "Envie apenas {assetSymbol} para este endereço. Outros ativos podem ser perdidos.",
+    simulate_deposit: "Simular Depósito de Teste",
+    deposit_received: "Depósito de teste recebido!",
+
+    // Withdraw Modal
+    withdraw_from: "Sacar de",
+    destination_address: "Endereço de destino",
+    amount: "Quantia",
+    confirm_withdrawal: "CONFIRMAR SAQUE",
+    withdrawal_successful: "Saque realizado com sucesso!",
     
     // General
     status: "Status",
     error: "Erro",
     success: "Sucesso",
+    close: "Fechar",
   }
 };

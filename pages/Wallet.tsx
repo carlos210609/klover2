@@ -5,6 +5,7 @@ import { backendService } from '../services/mockBackend';
 import { Transaction, TransactionType, User, CryptoAsset, PortfolioAsset } from '../types';
 import { useLanguage } from '../App';
 import { SUPPORTED_ASSETS } from '../constants';
+import Modal from '../components/Modal';
 
 const TransactionItem = ({ tx, asset }: { tx: Transaction, asset: CryptoAsset }) => {
     const isPositive = [TransactionType.DEPOSIT, TransactionType.SWAP_IN].includes(tx.type);
@@ -29,6 +30,109 @@ const TransactionItem = ({ tx, asset }: { tx: Transaction, asset: CryptoAsset })
     );
 };
 
+// --- Modals ---
+
+const DepositModal = ({ asset, onClose }: { asset: CryptoAsset; onClose: () => void; }) => {
+    const { t } = useLanguage();
+    const [feedback, setFeedback] = useState('');
+
+    // This would be a real address from your backend
+    const fakeAddress = `0x...${asset.symbol.toLowerCase()}${Date.now().toString().slice(-4)}`;
+
+    const handleSimulateDeposit = async () => {
+        await backendService.performDeposit(asset.id, 0.1); // Deposit a fixed test amount
+        setFeedback(t('deposit_received'));
+        setTimeout(() => {
+            onClose();
+        }, 1500);
+    };
+
+    return (
+        <div className="flex flex-col items-center text-center">
+            <div className="w-24 h-24 mb-4 rounded-lg bg-white p-2">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${fakeAddress}`} alt="QR Code" />
+            </div>
+            <p className="text-sm text-k-text-secondary mb-2">{t('your_address')}</p>
+            <p className="font-mono text-k-text-primary bg-k-bg p-2 rounded-md break-all">{fakeAddress}</p>
+            <p className="text-xs text-k-text-tertiary mt-4">
+                {t('deposit_warning').replace('{assetSymbol}', asset.symbol)}
+            </p>
+            <button onClick={handleSimulateDeposit} className="mt-6 w-full h-12 rounded-lg font-bold bg-k-accent text-k-bg transition-colors hover:opacity-90">
+                {t('simulate_deposit')}
+            </button>
+            {feedback && <p className="text-k-green text-sm mt-2">{feedback}</p>}
+        </div>
+    )
+}
+
+const WithdrawModal = ({ asset, balance, onClose }: { asset: CryptoAsset; balance: number; onClose: () => void; }) => {
+    const { t } = useLanguage();
+    const [address, setAddress] = useState('');
+    const [amount, setAmount] = useState('');
+    const [feedback, setFeedback] = useState({ message: '', type: '' });
+    const [isProcessing, setIsProcessing] = useState(false);
+    
+    const handleWithdraw = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const numAmount = parseFloat(amount);
+
+        if (!address || numAmount <= 0) {
+            setFeedback({ message: 'Preencha todos os campos.', type: 'error' });
+            return;
+        }
+        if (numAmount > balance) {
+            setFeedback({ message: t('insufficient_balance'), type: 'error' });
+            return;
+        }
+
+        setIsProcessing(true);
+        setFeedback({ message: '', type: '' });
+        try {
+            await backendService.performWithdrawal(asset.id, numAmount, address);
+            setFeedback({ message: t('withdrawal_successful'), type: 'success' });
+            setTimeout(() => onClose(), 1500);
+        } catch (error: any) {
+            setFeedback({ message: error.message, type: 'error' });
+        }
+        setIsProcessing(false);
+    }
+
+    return (
+        <form onSubmit={handleWithdraw}>
+            <div className="mb-4">
+                <label className="block text-sm text-k-text-secondary mb-1">{t('destination_address')}</label>
+                <input 
+                    type="text" 
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="0x..."
+                    className="w-full bg-k-bg border border-k-border rounded-lg p-2 focus:outline-none focus:border-k-accent"
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block text-sm text-k-text-secondary mb-1">{t('amount')}</label>
+                <input 
+                    type="number" 
+                    step="any"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.0"
+                    className="w-full bg-k-bg border border-k-border rounded-lg p-2 focus:outline-none focus:border-k-accent"
+                />
+            </div>
+             {feedback.message && (
+                <p className={`text-center text-sm mb-4 ${feedback.type === 'error' ? 'text-red-500' : 'text-k-green'}`}>{feedback.message}</p>
+             )}
+            <button type="submit" disabled={isProcessing} className="w-full h-12 rounded-lg font-bold bg-k-accent text-k-bg transition-colors hover:opacity-90 disabled:opacity-50">
+                {isProcessing ? 'PROCESSANDO...' : t('confirm_withdrawal')}
+            </button>
+        </form>
+    );
+}
+
+
+// --- Main Component ---
+
 const Wallet = () => {
     const { t } = useLanguage();
     const { assetId } = useParams();
@@ -40,6 +144,9 @@ const Wallet = () => {
     const [assetPortfolio, setAssetPortfolio] = useState<PortfolioAsset | null>(null);
     const [loading, setLoading] = useState(true);
     
+    const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+
     const [liveMarketData, setLiveMarketData] = useState<{ priceBRL: number | null, apr: number | null }>({ priceBRL: null, apr: null });
     const [isLiveLoading, setIsLiveLoading] = useState(true);
 
@@ -132,8 +239,8 @@ const Wallet = () => {
             </div>
             
             <div className="flex gap-4 mb-8">
-                <button className="flex-1 h-12 rounded-lg font-bold bg-k-accent text-k-bg">{t('deposit')}</button>
-                <button className="flex-1 h-12 rounded-lg font-bold bg-k-surface border border-k-border text-k-text-primary">{t('withdraw')}</button>
+                <button onClick={() => setIsDepositModalOpen(true)} className="flex-1 h-12 rounded-lg font-bold bg-k-accent text-k-bg">{t('deposit')}</button>
+                <button onClick={() => setIsWithdrawModalOpen(true)} className="flex-1 h-12 rounded-lg font-bold bg-k-surface border border-k-border text-k-text-primary">{t('withdraw')}</button>
             </div>
 
             <div className="bg-k-surface border border-k-border rounded-lg p-4 mb-6">
@@ -168,6 +275,14 @@ const Wallet = () => {
             ) : (
                 <p className="text-k-text-secondary text-center p-4">Nenhuma transação para este ativo.</p>
             )}
+
+            <Modal isOpen={isDepositModalOpen} onClose={() => { setIsDepositModalOpen(false); fetchData(); }} title={`${t('deposit_to')} ${assetInfo.name}`}>
+                <DepositModal asset={assetInfo} onClose={() => { setIsDepositModalOpen(false); fetchData(); }} />
+            </Modal>
+            
+            <Modal isOpen={isWithdrawModalOpen} onClose={() => { setIsWithdrawModalOpen(false); fetchData(); }} title={`${t('withdraw_from')} ${assetInfo.name}`}>
+                <WithdrawModal asset={assetInfo} balance={assetPortfolio?.amount || 0} onClose={() => { setIsWithdrawModalOpen(false); fetchData(); }} />
+            </Modal>
         </div>
     );
 };
